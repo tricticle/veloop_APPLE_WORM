@@ -382,10 +382,11 @@ export function GameApp({
               variant="ghost"
               size="sm"
               className={`nav-button ${activeView === key ? 'nav-button-active' : ''}`}
+              aria-label={label}
               aria-current={activeView === key ? 'page' : undefined}
               onClick={() => setActiveView(key)}
             >
-              <Icon data-icon="inline-start" aria-hidden="true" /> {label}
+              <Icon data-icon="inline-start" aria-hidden="true" /> <span>{label}</span>
             </Button>
           ))}
         </nav>
@@ -401,7 +402,7 @@ export function GameApp({
               <Button variant="ghost" size="icon" className="signout-button" aria-label="Sign out" disabled={signOutPending} onClick={handleSignOut}><LogOut aria-hidden="true" /></Button>
             </>
           ) : (
-            <Link href="/sign-up" className="create-account-link"><UserRound aria-hidden="true" /><span>Save progress</span><ArrowUpRight aria-hidden="true" /></Link>
+            <Link href="/sign-up" className="create-account-link" aria-label="Create an account to save progress"><UserRound aria-hidden="true" /><span>Save progress</span><ArrowUpRight aria-hidden="true" /></Link>
           )}
         </div>
       </header>

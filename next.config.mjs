@@ -1,5 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    ...(process.env.VITE_GAME_NAME || process.env.GAME_NAME
+      ? { VITE_GAME_NAME: process.env.VITE_GAME_NAME || process.env.GAME_NAME }
+      : {}),
+    ...(process.env.VITE_API_URL ? { VITE_API_URL: process.env.VITE_API_URL } : {}),
+  },
   images: {
     unoptimized: true,
   },

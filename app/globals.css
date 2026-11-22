@@ -2606,6 +2606,13 @@ input:focus-visible {
     font-size: 10px;
   }
 
+  .create-account-link {
+    width: 34px;
+    height: 34px;
+    justify-content: center;
+    padding: 0;
+  }
+
   .create-account-link svg:last-child,
   .create-account-link span {
     display: none;
@@ -2631,15 +2638,27 @@ input:focus-visible {
   }
 
   .nav-button {
+    width: 36px;
     height: 34px;
     flex-shrink: 0;
-    padding-inline: 9px;
+    justify-content: center;
+    padding-inline: 0;
     font-size: 10px;
   }
 
+  .nav-button > span {
+    display: none;
+  }
+
   .nav-button svg {
-    width: 13px;
-    height: 13px;
+    width: 15px;
+    height: 15px;
+  }
+
+  .top-navigation {
+    justify-content: space-between;
+    overflow: visible;
+    gap: 4px;
   }
 
   .page-content {
