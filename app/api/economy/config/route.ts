@@ -6,10 +6,15 @@ import { DEFAULT_ECONOMY_CONFIG, readEconomyConfig } from '@/lib/game/economy-co
 import { adProviderAdapter } from '@/services/ads/ad-provider-adapter'
 
 export async function GET() {
-  const [row] = await db.select({ config: economyConfigs.config })
-    .from(economyConfigs)
-    .where(eq(economyConfigs.configKey, 'default'))
-    .limit(1)
+  let row: { config: Record<string, unknown> } | undefined
+  try {
+    ;[row] = await db.select({ config: economyConfigs.config })
+      .from(economyConfigs)
+      .where(eq(economyConfigs.configKey, 'default'))
+      .limit(1)
+  } catch {
+    row = undefined
+  }
   const config = readEconomyConfig(row?.config ?? DEFAULT_ECONOMY_CONFIG)
 
   return NextResponse.json({

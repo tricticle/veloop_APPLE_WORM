@@ -1,12 +1,17 @@
 import { betterAuth } from 'better-auth'
 import { pool } from '@/lib/db'
 
+const authSecret =
+  process.env.BETTER_AUTH_SECRET ||
+  'ai-studio-dev-fallback-secret-replace-in-production-32chars'
+
 if (!process.env.BETTER_AUTH_SECRET) {
-  throw new Error('BETTER_AUTH_SECRET is required to run authentication.')
+  console.warn('[AI Studio] BETTER_AUTH_SECRET not set — using development fallback secret')
 }
 
 export const auth = betterAuth({
   database: pool,
+  secret: authSecret,
   baseURL:
     process.env.BETTER_AUTH_URL ??
     (process.env.VERCEL_PROJECT_PRODUCTION_URL
@@ -19,6 +24,7 @@ export const auth = betterAuth({
     autoSignIn: true,
   },
   trustedOrigins: [
+    ...(process.env.BETTER_AUTH_URL ? [process.env.BETTER_AUTH_URL] : []),
     ...(process.env.NODE_ENV === 'development'
       ? [
           'http://localhost:3000',

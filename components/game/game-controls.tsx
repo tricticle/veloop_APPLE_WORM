@@ -52,7 +52,7 @@ export function GameControls({   disabled = false,
           <RotateCcw data-icon="inline-start" aria-hidden="true" /> Restart
         </Button>
       </div>
-      <p className="control-hint"><kbd>↑</kbd> <kbd>←</kbd> <kbd>↓</kbd> <kbd>→</kbd><span>or swipe the board</span></p>
+      <p className="control-hint"><kbd>↑</kbd> <kbd>←</kbd> <kbd>↓</kbd> <kbd>→</kbd><span>or click adjacent tiles / swipe</span></p>
     </div>
   )
 }
