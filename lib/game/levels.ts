@@ -23,6 +23,37 @@ export type GameLevel = {
   moveLimit: number
   parMoves: number
   solutionPath: Coordinate[]
+  alternatePath: Coordinate[]
+}
+
+export function getForestBugPosition(level: GameLevel): Coordinate | null {
+  const obstaclePositions = new Set(level.obstacles.flatMap((obstacle) =>
+    (obstacle.path ?? [obstacle]).map(({ x, y }) => `${x},${y}`),
+  ))
+  const protectedPositions = new Set([
+    ...level.solutionPath,
+    ...level.alternatePath,
+    ...level.wormStart,
+    ...level.apples,
+    level.portal,
+  ].map(({ x, y }) => `${x},${y}`))
+  const walkableCells = Array.from({ length: level.grid.rows * level.grid.columns }, (_, index) => ({
+    x: index % level.grid.columns,
+    y: Math.floor(index / level.grid.columns),
+  })).filter(({ x, y }) => {
+    const key = `${x},${y}`
+    return !obstaclePositions.has(key) && !protectedPositions.has(key)
+  })
+  const walkablePositions = new Set(walkableCells.map(({ x, y }) => `${x},${y}`))
+  const deadEnds = walkableCells.filter(({ x, y }) => [
+    { x: x + 1, y },
+    { x: x - 1, y },
+    { x, y: y + 1 },
+    { x, y: y - 1 },
+  ].filter(({ x: nextX, y: nextY }) => walkablePositions.has(`${nextX},${nextY}`)).length === 1)
+  const candidates = deadEnds.length ? deadEnds : walkableCells
+
+  return candidates.length ? candidates[(level.id - 1) % candidates.length] : null
 }
 
 type LevelTemplate = {
@@ -119,40 +150,100 @@ function buildLevel(id: number): GameLevel {
   const startKeySet = new Set(template.wormStart.map(({ x, y }) => `${x},${y}`))
   const mazeCellKeys = new Set([...pathKeySet, ...startKeySet])
   const mazeBranches: Coordinate[][] = []
-  const branchCount = Math.min(2 + Math.floor((id - 1) / 12), 5)
+  const branchCount = Math.min(3 + Math.floor((id - 1) / 10), 6)
   const sideDirections: Coordinate[] = [
     { x: 0, y: -1 },
     { x: 1, y: 0 },
     { x: 0, y: 1 },
     { x: -1, y: 0 },
   ]
+  let alternatePath: Coordinate[] | null = null
+
+  for (let attempt = 0; attempt < path.length - 1 && !alternatePath; attempt += 1) {
+    const edgeIndex = 1 + ((id * 3 + attempt) % (path.length - 2))
+    const first = path[edgeIndex]
+    const second = path[edgeIndex + 1]
+    const offsets = first.y === second.y
+      ? [{ x: 0, y: 1 }, { x: 0, y: -1 }]
+      : [{ x: 1, y: 0 }, { x: -1, y: 0 }]
+
+    for (const offset of offsets) {
+      const firstDetour = { x: first.x + offset.x, y: first.y + offset.y }
+      const secondDetour = { x: second.x + offset.x, y: second.y + offset.y }
+      const withinBoard = (point: Coordinate) => point.x >= 0 && point.x < 7 && point.y >= 0 && point.y < 7
+      const neighborsOf = (point: Coordinate) => [
+        { x: point.x + 1, y: point.y },
+        { x: point.x - 1, y: point.y },
+        { x: point.x, y: point.y + 1 },
+        { x: point.x, y: point.y - 1 },
+      ]
+      const firstConnections = neighborsOf(firstDetour).filter((point) => mazeCellKeys.has(`${point.x},${point.y}`))
+      const secondConnections = neighborsOf(secondDetour).filter((point) => mazeCellKeys.has(`${point.x},${point.y}`))
+      const connectsOnlyToEndpoint = (connections: Coordinate[], endpoint: Coordinate) =>
+        connections.length === 1 && connections[0].x === endpoint.x && connections[0].y === endpoint.y
+
+      if (!withinBoard(firstDetour) || !withinBoard(secondDetour) ||
+        mazeCellKeys.has(`${firstDetour.x},${firstDetour.y}`) || mazeCellKeys.has(`${secondDetour.x},${secondDetour.y}`) ||
+        !connectsOnlyToEndpoint(firstConnections, first) || !connectsOnlyToEndpoint(secondConnections, second)) continue
+
+      mazeCellKeys.add(`${firstDetour.x},${firstDetour.y}`)
+      mazeCellKeys.add(`${secondDetour.x},${secondDetour.y}`)
+      alternatePath = [
+        ...path.slice(0, edgeIndex + 1),
+        firstDetour,
+        secondDetour,
+        ...path.slice(edgeIndex + 1),
+      ]
+      break
+    }
+  }
+
+  if (!alternatePath) throw new Error(`No alternate route found for level ${id}`)
 
   for (let attempt = 0; attempt < path.length * 4 && mazeBranches.length < branchCount; attempt += 1) {
-    const pathIndex = 1 + ((id * 3 + attempt * 2) % (path.length - 2))
+    const pathIndex = 1 + ((id * 3 + attempt) % (path.length - 2))
     const root = path[pathIndex]
     const directionOffset = (id + attempt) % sideDirections.length
 
     for (let directionIndex = 0; directionIndex < sideDirections.length; directionIndex += 1) {
-      const direction = sideDirections[(directionOffset + directionIndex) % sideDirections.length]
       const branch: Coordinate[] = []
       let previous = root
+      let travelDirection = sideDirections[(directionOffset + directionIndex) % sideDirections.length]
 
-      for (let distance = 1; distance <= 2; distance += 1) {
-        const candidate = { x: previous.x + direction.x, y: previous.y + direction.y }
-        const candidateKey = `${candidate.x},${candidate.y}`
-        const touchingMaze = [
-          { x: candidate.x + 1, y: candidate.y },
-          { x: candidate.x - 1, y: candidate.y },
-          { x: candidate.x, y: candidate.y + 1 },
-          { x: candidate.x, y: candidate.y - 1 },
-        ].filter((point) => mazeCellKeys.has(`${point.x},${point.y}`))
+      for (let distance = 1; distance <= 3; distance += 1) {
+        const travelIndex = sideDirections.indexOf(travelDirection)
+        const directions = [
+          travelDirection,
+          sideDirections[(travelIndex + 1) % sideDirections.length],
+          sideDirections[(travelIndex + 3) % sideDirections.length],
+          sideDirections[(travelIndex + 2) % sideDirections.length],
+        ]
+        let candidate: Coordinate | null = null
+        let nextDirection: Coordinate | null = null
 
-        if (candidate.x < 0 || candidate.x >= 7 || candidate.y < 0 || candidate.y >= 7 ||
-          mazeCellKeys.has(candidateKey) || touchingMaze.some((point) => point.x !== previous.x || point.y !== previous.y)) break
+        for (const direction of directions) {
+          const next = { x: previous.x + direction.x, y: previous.y + direction.y }
+          const candidateKey = `${next.x},${next.y}`
+          const touchingMaze = [
+            { x: next.x + 1, y: next.y },
+            { x: next.x - 1, y: next.y },
+            { x: next.x, y: next.y + 1 },
+            { x: next.x, y: next.y - 1 },
+          ].filter((point) => mazeCellKeys.has(`${point.x},${point.y}`))
+          const outsideBoard = next.x < 0 || next.x >= 7 || next.y < 0 || next.y >= 7
+          const touchesAnotherPassage = touchingMaze.some((point) => point.x !== previous.x || point.y !== previous.y)
 
+          if (outsideBoard || mazeCellKeys.has(candidateKey) || touchesAnotherPassage) continue
+          candidate = next
+          nextDirection = direction
+          break
+        }
+
+        if (!candidate || !nextDirection) break
         branch.push(candidate)
-        mazeCellKeys.add(candidateKey)
+        mazeCellKeys.add(`${candidate.x},${candidate.y}`)
         previous = candidate
+        travelDirection = nextDirection
       }
 
       if (branch.length) {
@@ -201,9 +292,10 @@ function buildLevel(id: number): GameLevel {
     objective,
     requiredApples,
     targetLength: template.wormStart.length + requiredApples,
-    moveLimit: Math.max(parMoves + moveBonus, Math.ceil(parMoves * 1.4)),
+    moveLimit: Math.max(parMoves + moveBonus, Math.ceil(parMoves * 1.4), parMoves + 4),
     parMoves,
     solutionPath: path,
+    alternatePath,
   }
 }
 
@@ -216,22 +308,28 @@ export function getLevel(levelId: number): GameLevel {
 }
 
 export function isLevelSolvable(level: GameLevel): boolean {
-  const { solutionPath, obstacles, apples, portal, wormStart, moveLimit } = level
+  const { solutionPath, alternatePath, obstacles, apples, portal, wormStart, moveLimit } = level
   const obstacleKeys = new Set(obstacles.flatMap((obstacle) =>
     (obstacle.path ?? [obstacle]).map(({ x, y }) => `${x},${y}`),
   ))
-  const pathKeys = new Set(solutionPath.map(({ x, y }) => `${x},${y}`))
   const appleKeys = new Set(apples.map(({ x, y }) => `${x},${y}`))
   const isAdjacent = (first: Coordinate, second: Coordinate) =>
     Math.abs(first.x - second.x) + Math.abs(first.y - second.y) === 1
+  const routeIsValid = (route: Coordinate[]) => {
+    const routeKeys = new Set(route.map(({ x, y }) => `${x},${y}`))
+    const finalPoint = route[route.length - 1]
+    return route.length >= 2 && route.length - 1 <= moveLimit &&
+      route[0].x === wormStart[0].x && route[0].y === wormStart[0].y &&
+      (route[1].x !== wormStart[1].x || route[1].y !== wormStart[1].y) &&
+      route.every((point, index) => !obstacleKeys.has(`${point.x},${point.y}`) &&
+        (index === 0 || isAdjacent(route[index - 1], point))) &&
+      routeKeys.size === route.length &&
+      Array.from(appleKeys).every((key) => routeKeys.has(key)) &&
+      finalPoint.x === portal.x && finalPoint.y === portal.y
+  }
 
-  if (solutionPath.length < 2 || moveLimit < solutionPath.length - 1) return false
-  if (solutionPath[0].x !== wormStart[0].x || solutionPath[0].y !== wormStart[0].y) return false
-  if (solutionPath.some((point, index) => index > 0 && !isAdjacent(solutionPath[index - 1], point))) return false
-  if (solutionPath.some(({ x, y }) => obstacleKeys.has(`${x},${y}`))) return false
-  if (Array.from(appleKeys).some((key) => !pathKeys.has(key))) return false
-  const finalPoint = solutionPath[solutionPath.length - 1]
-  return finalPoint.x === portal.x && finalPoint.y === portal.y
+  return routeIsValid(solutionPath) && routeIsValid(alternatePath) &&
+    alternatePath.length === solutionPath.length + 2
 }
 
 export const INVALID_LEVEL_IDS = LEVELS

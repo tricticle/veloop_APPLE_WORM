@@ -209,7 +209,7 @@ export async function undoGameAction(sessionId: string) {
     const stored = session.state
     const previous = stored.history.at(-1)
     if (session.status === 'FAILED' && !previous) {
-      const state = { ...stored.current, status: 'playing' as const, feedback: 'Last move undone.' }
+      const state = { ...stored.current, status: 'playing' as const, failureCause: null, feedback: 'Last move undone.' }
       await tx.update(gameSessions).set({
         state: { current: state, history: stored.history },
         status: 'ACTIVE',

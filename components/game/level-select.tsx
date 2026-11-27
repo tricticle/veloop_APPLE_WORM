@@ -21,7 +21,7 @@ export function LevelSelect({ levels, unlockedThrough, completedLevels, levelSta
         <div className="levels-progress-pill">{Math.min(unlockedThrough, 50)} <span>of 50 open</span></div>
       </div>
       {['The Apple Grove', 'Fernwood Forest', 'Mosslight Meadow', 'Bramble Ridge', 'The Golden Canopy'].map((world, worldIndex) => (
-        <div className="world-group" key={world}>
+        <div className={`world-group world-group-${worldIndex + 1}`} key={world}>
           <div className="world-heading">
             <span className="world-number">0{worldIndex + 1}</span>
             <h3>{world}</h3>
@@ -31,19 +31,22 @@ export function LevelSelect({ levels, unlockedThrough, completedLevels, levelSta
             {levels.slice(worldIndex * 10, worldIndex * 10 + 10).map((level) => {
               const isLocked = level.id > unlockedThrough
               const stars = completedLevels[level.id] ?? 0
+              const isNextLevel = level.id === unlockedThrough && stars === 0
               const stats = levelStats[level.id]
               const bestLabel = stats ? `, best score ${stats.score}, best moves ${stats.bestMoves ?? 'not recorded'}` : ''
               return (
                 <button
                   key={level.id}
                   type="button"
-                  className={`level-tile ${isLocked ? 'level-locked' : ''} ${stars ? 'level-complete' : ''}`}
+                  className={`level-tile ${isLocked ? 'level-locked' : ''} ${stars ? 'level-complete' : ''} ${isNextLevel ? 'level-next' : ''}`}
                   onClick={() => onSelect(level.id)}
                   disabled={isLocked}
-                  aria-label={isLocked ? `Level ${level.id}, locked` : `Play level ${level.id}${stars ? `, ${stars} stars` : ''}${bestLabel}`}
+                  aria-current={isNextLevel ? 'step' : undefined}
+                  aria-label={isLocked ? `Level ${level.id}, locked` : `Play level ${level.id}${isNextLevel ? ', next trail' : ''}${stars ? `, ${stars} stars` : ''}${bestLabel}`}
                   title={isLocked ? 'Complete the previous level to unlock this trail.' : bestLabel.slice(2) || `Play ${level.name}`}
                 >
                   <span className="level-tile-number">{String(level.id).padStart(2, '0')}</span>
+                  {isNextLevel && <span className="level-next-badge">NEXT</span>}
                   {isLocked ? <LockKeyhole aria-hidden="true" /> : stars ? <Check aria-hidden="true" /> : <span className="level-dot" aria-hidden="true" />}
                   {stars > 0 && <span className="level-stars" aria-label={`${stars} stars`}><Star /><span>{stars}</span></span>}
                 </button>

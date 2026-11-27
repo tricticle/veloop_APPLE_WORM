@@ -16,10 +16,11 @@ import {
   LogOut,
   Map,
   Bird,
+  Bug,
   ShieldCheck,
   Sparkles,
-  SlidersHorizontal,
   Star,
+  SlidersHorizontal,
   Trophy,
   UserRound,
   Medal,
@@ -37,7 +38,7 @@ import { SettingsView } from '@/components/game/settings-view'
 import { LeaderboardView, type LeaderboardEntry } from '@/components/game/leaderboard-view'
 import { authClient } from '@/lib/auth-client'
 import { playGameSound, startAmbientMusic } from '@/lib/game/audio'
-import { calculateStars, createInitialState, findHintDirection, moveGame, type Direction, type GameState, type MoveEvent } from '@/lib/game/engine'
+import { calculateStars, createInitialState, findHintDirection, getStarThresholds, moveGame, type Direction, type FailureCause, type GameState, type MoveEvent } from '@/lib/game/engine'
 import { DEFAULT_ECONOMY_CONFIG, type EconomyConfig } from '@/lib/game/economy-config'
 import { LEVELS, type GameLevel } from '@/lib/game/levels'
 
@@ -91,6 +92,16 @@ const navItems: Array<{ key: View; label: string; Icon: typeof Gamepad2 }> = [
 
 function levelHeading(level: GameLevel) {
   return `Level ${String(level.id).padStart(2, '0')}`
+}
+
+const failureStories: Record<FailureCause, { title: string; description: string }> = {
+  edge: { title: 'Off the trail!', description: 'The worm slipped beyond the path. Undo a move and find another way through.' },
+  moves: { title: 'Out of moves!', description: 'This run ran out of steps. Undo a move or give the maze another try.' },
+  thorn: { title: 'A thorny surprise!', description: 'A bramble stopped the worm in its tracks. Undo a move and find a safer path.' },
+  pit: { title: 'Down the burrow!', description: 'The path gave way beneath the worm. Undo a move and choose another turn.' },
+  tail: { title: 'Tail chomp!', description: 'The worm doubled back and bit its own tail. Undo a move and try a wider loop.' },
+  bird: { title: 'A swooping bird!', description: 'A forest bird crossed the trail. Undo a move and wait for a clear opening.' },
+  beetle: { title: 'Eaten by the beetle!', description: 'A hungry jungle beetle made a meal of the worm. Undo a move or steer around it.' },
 }
 
 function playMoveFeedback(event: MoveEvent, previous: GameState, next: GameState, enabled: boolean) {
@@ -149,6 +160,8 @@ export function GameApp({
   const isFailed = game.status === 'failed'
   const movementDisabled = isBusy || isFinished || isFailed
   const remainingObjective = Math.max(0, level.requiredApples - game.collectedApples)
+  const starThresholds = getStarThresholds(level)
+  const failureStory = isFailed && game.failureCause ? failureStories[game.failureCause] : null
 
   useEffect(() => () => {
     stopMusicRef.current?.()
@@ -292,7 +305,7 @@ export function GameApp({
 
     playGameSound('move', audioPreferences.soundEnabled)
     if (isFailed && !history.length) {
-      setGame((current) => ({ ...current, status: 'playing', feedback: 'Last move undone.' }))
+      setGame((current) => ({ ...current, status: 'playing', failureCause: null, feedback: 'Last move undone.' }))
       return
     }
 
@@ -415,7 +428,7 @@ export function GameApp({
           <div>
             <p className="eyebrow"><span className="eyebrow-dot" /> A jungle trail adventure</p>
             <h1 id="page-title">{displayViewHeading[activeView]}</h1>
-              <p className="page-subtitle">Guide your jungle friend along the wooden trail, gather apples, and dodge the birds guarding the moonlit portal.</p>
+              <p className="page-subtitle">Guide your jungle friend along the wooden trail, gather apples, and dodge beetles and birds on the way to the moonlit portal.</p>
 
           </div>
           <div className="journey-progress">
@@ -471,12 +484,17 @@ export function GameApp({
                           {Array.from({ length: 3 }, (_, index) => <Star key={index} className={index < completion.stars ? 'star-earned' : ''} aria-hidden="true" />)}
                         </div>
                       )}
-                      <h3 id="board-result-title">{isFailed ? 'A thorny turn!' : 'Maze mastered!'}</h3>
+                      <h3 id="board-result-title">{isFailed ? failureStory?.title ?? 'Trail interrupted!' : 'Maze mastered!'}</h3>
                       <p>{isFailed
-                        ? 'Every great explorer hits a wall. Undo a step or give this maze another try.'
+                        ? failureStory?.description ?? game.feedback ?? 'Undo a step or give this maze another try.'
                         : level.id < unlockedThrough
                           ? 'Brilliant trail-finding. Want to explore the next maze or take this one again?'
                           : 'You reached the end of the trail. Replay this maze or choose another level.'}</p>
+                      {isFinished && completion && (
+                        <span className="board-result-moves">
+                          {game.moves} {game.moves === 1 ? 'move' : 'moves'} · {completion.stars === 3 ? 'shortcut mastered' : completion.stars === 2 ? 'scenic detour' : 'trail completed'}
+                        </span>
+                      )}
                       {isFinished && completion && (
                         <span className="board-result-reward">
                           {completion.rewardCoins > 0 ? `+${completion.rewardCoins} acorns earned` : `${game.score.toLocaleString()} trail points`}
@@ -543,13 +561,22 @@ export function GameApp({
                   </li>
                 </ol>
                 <div className="trail-divider" />
-                <div className="tile-legend" aria-label="Game board legend">
+                <div className="tile-legend" aria-label="Two possible trails and board markers">
+                  <span><i className="legend-walkable legend-route-a" aria-hidden="true">A</i> Route A</span>
+                  <span><i className="legend-alternate legend-route-b" aria-hidden="true">B</i> Route B</span>
                   <span><i className="legend-wall"><span /></i> Maze wall</span>
                   <span><i className="legend-apple"><Apple aria-hidden="true" /></i> Apple</span>
                   <span><i className="legend-portal"><Sparkles aria-hidden="true" /></i> Portal</span>
                   <span><i className="legend-spike"><span /></i> Hazard</span>
                   <span><i className="legend-moving"><Bird aria-hidden="true" /></i> Flying bird</span>
+                  <span><i className="legend-beetle"><Bug aria-hidden="true" /></i> Beetle</span>
                 </div>
+                <section className="star-rating-guide" aria-label="Star ratings based on moves">
+                  <p className="star-rating-heading"><Star aria-hidden="true" /> Earn stars by moves</p>
+                  <div className="star-rating-row"><span><Star aria-hidden="true" /> 3 stars</span><strong>≤ {starThresholds.threeStars} moves</strong></div>
+                  <div className="star-rating-row"><span><Star aria-hidden="true" /> 2 stars</span><strong>{starThresholds.threeStars + 1}–{starThresholds.twoStars} moves</strong></div>
+                  <div className="star-rating-row"><span><Star aria-hidden="true" /> 1 star</span><strong>{starThresholds.twoStars + 1}+ moves</strong></div>
+                </section>
               </section>
 
               <section className="sidebar-card economy-card">
