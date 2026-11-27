@@ -1,7 +1,66 @@
 import { Apple, Bird, Bug, CircleDashed, LockKeyhole, Sparkles, Triangle } from 'lucide-react'
-import type { ReactNode, TouchEventHandler } from 'react'
+import type { CSSProperties, ReactNode, TouchEventHandler } from 'react'
 import type { GameState } from '@/lib/game/engine'
 import { getForestBugPosition, type GameLevel } from '@/lib/game/levels'
+
+type WormDirection = 'right' | 'left' | 'up' | 'down'
+
+function createWormPath(worm: GameState['worm']) {
+  const points = worm.map(({ x, y }) => ({ x: x + 0.5, y: y + 0.5 }))
+  if (!points.length) return ''
+
+  let path = `M ${points[0].x} ${points[0].y}`
+
+  for (let index = 1; index < points.length - 1; index += 1) {
+    const previous = points[index - 1]
+    const current = points[index]
+    const next = points[index + 1]
+    const incomingX = previous.x - current.x
+    const incomingY = previous.y - current.y
+    const outgoingX = next.x - current.x
+    const outgoingY = next.y - current.y
+    const incomingLength = Math.hypot(incomingX, incomingY)
+    const outgoingLength = Math.hypot(outgoingX, outgoingY)
+    const turn = incomingX * outgoingY - incomingY * outgoingX
+
+    if (turn === 0) {
+      path += ` L ${current.x} ${current.y}`
+      continue
+    }
+
+    const radius = Math.min(0.3, incomingLength / 2, outgoingLength / 2)
+    const startX = current.x + (incomingX / incomingLength) * radius
+    const startY = current.y + (incomingY / incomingLength) * radius
+    const endX = current.x + (outgoingX / outgoingLength) * radius
+    const endY = current.y + (outgoingY / outgoingLength) * radius
+
+    path += ` L ${startX} ${startY} Q ${current.x} ${current.y} ${endX} ${endY}`
+  }
+
+  const tail = points[points.length - 1]
+  const previous = points[points.length - 2] ?? tail
+  const tailX = tail.x + (previous.x - tail.x) * 0.12
+  const tailY = tail.y + (previous.y - tail.y) * 0.12
+
+  return `${path} L ${tailX} ${tailY}`
+}
+
+function createWormGazeStyle(
+  head: GameState['worm'][number],
+  target: { x: number; y: number },
+  direction: WormDirection,
+): CSSProperties {
+  const deltaX = target.x - head.x
+  const deltaY = target.y - head.y
+  const localX = direction === 'right' ? deltaX : direction === 'left' ? -deltaX : direction === 'down' ? deltaY : -deltaY
+  const localY = direction === 'right' ? deltaY : direction === 'left' ? -deltaY : direction === 'down' ? -deltaX : deltaX
+  const extent = Math.max(1, Math.abs(localX), Math.abs(localY))
+
+  return {
+    '--worm-gaze-x': `${(localX / extent) * 18}%`,
+    '--worm-gaze-y': `${(localY / extent) * 18}%`,
+  } as CSSProperties
+}
 
 type GameBoardProps = {
   level: GameLevel
@@ -24,29 +83,17 @@ export function GameBoard({ level, state, onTouchStart, onTouchEnd, resultOverla
   const bestRoutePositions = new Set(level.solutionPath.map(({ x, y }) => `${x},${y}`))
   const alternateRoutePositions = new Set(level.alternatePath.map(({ x, y }) => `${x},${y}`))
   const beetlePosition = getForestBugPosition(level)
-  const wormPath = state.worm.map(({ x, y }) => `${x + 0.5},${y + 0.5}`).join(' ')
-  const wormBodySegments = state.worm.slice(1).map((segment, index) => {
-    const wormIndex = index + 1
-    const headSide = state.worm[wormIndex - 1]
-    const tailSide = state.worm[wormIndex + 1] ?? segment
-    const horizontal = Math.abs(tailSide.x - headSide.x) >= Math.abs(tailSide.y - headSide.y)
-    const x = segment.x + 0.5
-    const y = segment.y + 0.5
-    const stripe = horizontal
-      ? `M ${x} ${y - 0.2} L ${x} ${y + 0.2}`
-      : `M ${x - 0.2} ${y} L ${x + 0.2} ${y}`
-    return {
-      key: `${segment.x},${segment.y},${wormIndex}`,
-      x,
-      y,
-      stripe,
-      isTail: wormIndex === state.worm.length - 1,
-      pulseDelay: `${-wormIndex * 0.08}s`,
-    }
-  })
+  const wormPath = createWormPath(state.worm)
   const head = state.worm[0]
   const neck = state.worm[1]
-  const headDirection = !neck || head.x > neck.x ? 'right' : head.x < neck.x ? 'left' : head.y > neck.y ? 'down' : 'up'
+  const headDirection: WormDirection = !neck || head.x > neck.x ? 'right' : head.x < neck.x ? 'left' : head.y > neck.y ? 'down' : 'up'
+  const gazeTarget = state.remainingApples.reduce((target, apple, index) => {
+    if (index === 0) return apple
+    const appleDistance = Math.abs(apple.x - head.x) + Math.abs(apple.y - head.y)
+    const targetDistance = Math.abs(target.x - head.x) + Math.abs(target.y - head.y)
+    return appleDistance < targetDistance ? apple : target
+  }, level.portal)
+  const wormFaceStyle = createWormGazeStyle(head, gazeTarget, headDirection)
 
   return (
     <div className="board-frame">
@@ -92,7 +139,7 @@ export function GameBoard({ level, state, onTouchStart, onTouchEnd, resultOverla
               className={`game-tile ${(x + y) % 2 === 0 ? 'tile-even' : 'tile-odd'} ${obstacle ? `tile-obstacle tile-${obstacle.type}` : 'tile-walkable'} ${isBestRoute ? 'tile-best-route' : ''} ${isAlternateRoute ? 'tile-alternate-route' : ''} ${isWorm ? isHead ? 'tile-worm-head' : 'tile-worm-body' : ''} ${isPortal ? 'tile-portal' : ''} ${hasApple ? 'tile-apple' : ''}`}
             >
               {isHead && (
-                <span className={`worm-face worm-face-${headDirection} ${state.status === 'failed' ? 'worm-face-failed' : ''}`} aria-hidden="true">
+                <span className={`worm-face worm-face-${headDirection} ${state.status === 'failed' ? 'worm-face-failed' : ''}`} style={wormFaceStyle} aria-hidden="true">
                   <span className="worm-eye worm-eye-left" />
                   <span className="worm-eye worm-eye-right" />
                   <span className="worm-cheek" />
@@ -127,28 +174,9 @@ export function GameBoard({ level, state, onTouchStart, onTouchEnd, resultOverla
             viewBox={`0 0 ${level.grid.columns} ${level.grid.rows}`}
             preserveAspectRatio="none"
           >
-            <defs>
-              <linearGradient id={`worm-gradient-${level.id}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#82e55f" />
-                <stop offset="48%" stopColor="#42b941" />
-                <stop offset="100%" stopColor="#168238" />
-              </linearGradient>
-            </defs>
-            <polyline className="worm-path-shadow" points={wormPath} />
-            <polyline className="worm-path-body" points={wormPath} style={{ stroke: `url(#worm-gradient-${level.id})` }} />
-            <polyline className="worm-path-shine" points={wormPath} />
-            {wormBodySegments.map(({ key, x, y, stripe, isTail, pulseDelay }) => (
-              <g
-                key={key}
-                className={`worm-body-segment ${isTail ? 'worm-tail-segment' : ''}`}
-                style={{ animationDelay: pulseDelay }}
-              >
-                <circle className="worm-segment-outline" cx={x} cy={y} r="0.34" />
-                <circle className="worm-segment-bead" cx={x} cy={y} r="0.29" />
-                <path className="worm-segment-stripe" d={stripe} />
-                <circle className="worm-segment-glint" cx={x - 0.1} cy={y - 0.11} r="0.055" />
-              </g>
-            ))}
+            <path className="worm-path-shadow" d={wormPath} />
+            <path className="worm-path-body" d={wormPath} />
+            <path className="worm-path-shine" d={wormPath} />
           </svg>
         )}
       </div>
