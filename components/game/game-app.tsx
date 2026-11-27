@@ -18,8 +18,8 @@ import {
   Bird,
   ShieldCheck,
   Sparkles,
-  SlidersHorizontal,
   Star,
+  SlidersHorizontal,
   Trophy,
   UserRound,
   Medal,
@@ -37,7 +37,7 @@ import { SettingsView } from '@/components/game/settings-view'
 import { LeaderboardView, type LeaderboardEntry } from '@/components/game/leaderboard-view'
 import { authClient } from '@/lib/auth-client'
 import { playGameSound, startAmbientMusic } from '@/lib/game/audio'
-import { calculateStars, createInitialState, findHintDirection, moveGame, type Direction, type GameState, type MoveEvent } from '@/lib/game/engine'
+import { calculateStars, createInitialState, findHintDirection, getStarThresholds, moveGame, type Direction, type GameState, type MoveEvent } from '@/lib/game/engine'
 import { DEFAULT_ECONOMY_CONFIG, type EconomyConfig } from '@/lib/game/economy-config'
 import { LEVELS, type GameLevel } from '@/lib/game/levels'
 
@@ -149,6 +149,7 @@ export function GameApp({
   const isFailed = game.status === 'failed'
   const movementDisabled = isBusy || isFinished || isFailed
   const remainingObjective = Math.max(0, level.requiredApples - game.collectedApples)
+  const starThresholds = getStarThresholds(level)
 
   useEffect(() => () => {
     stopMusicRef.current?.()
@@ -478,6 +479,11 @@ export function GameApp({
                           ? 'Brilliant trail-finding. Want to explore the next maze or take this one again?'
                           : 'You reached the end of the trail. Replay this maze or choose another level.'}</p>
                       {isFinished && completion && (
+                        <span className="board-result-moves">
+                          {game.moves} {game.moves === 1 ? 'move' : 'moves'} · {completion.stars === 3 ? 'shortcut mastered' : completion.stars === 2 ? 'scenic detour' : 'trail completed'}
+                        </span>
+                      )}
+                      {isFinished && completion && (
                         <span className="board-result-reward">
                           {completion.rewardCoins > 0 ? `+${completion.rewardCoins} acorns earned` : `${game.score.toLocaleString()} trail points`}
                         </span>
@@ -544,12 +550,20 @@ export function GameApp({
                 </ol>
                 <div className="trail-divider" />
                 <div className="tile-legend" aria-label="Game board legend">
+                  <span><i className="legend-walkable" aria-hidden="true" /> Best route</span>
+                  <span><i className="legend-alternate" aria-hidden="true" /> Scenic detour</span>
                   <span><i className="legend-wall"><span /></i> Maze wall</span>
                   <span><i className="legend-apple"><Apple aria-hidden="true" /></i> Apple</span>
                   <span><i className="legend-portal"><Sparkles aria-hidden="true" /></i> Portal</span>
                   <span><i className="legend-spike"><span /></i> Hazard</span>
                   <span><i className="legend-moving"><Bird aria-hidden="true" /></i> Flying bird</span>
                 </div>
+                <section className="star-rating-guide" aria-label="Star ratings based on moves">
+                  <p className="star-rating-heading"><Star aria-hidden="true" /> Earn stars by moves</p>
+                  <div className="star-rating-row"><span><Star aria-hidden="true" /> 3 stars</span><strong>Best route · {starThresholds.threeStars} moves</strong></div>
+                  <div className="star-rating-row"><span><Star aria-hidden="true" /> 2 stars</span><strong>Detour · {starThresholds.threeStars + 1}–{starThresholds.twoStars} moves</strong></div>
+                  <div className="star-rating-row"><span><Star aria-hidden="true" /> 1 star</span><strong>{starThresholds.twoStars + 1}+ moves</strong></div>
+                </section>
               </section>
 
               <section className="sidebar-card economy-card">

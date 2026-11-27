@@ -134,9 +134,17 @@ export function moveGame(level: GameLevel, state: GameState, direction: Directio
   }
 }
 
+export function getStarThresholds(level: GameLevel) {
+  return {
+    threeStars: level.parMoves,
+    twoStars: Math.min(level.alternatePath.length - 1, level.moveLimit),
+  }
+}
+
 export function calculateStars(level: GameLevel, moves: number): number {
-  if (moves <= level.parMoves) return 3
-  if (moves <= level.parMoves + 4) return 2
+  const thresholds = getStarThresholds(level)
+  if (moves <= thresholds.threeStars) return 3
+  if (moves <= thresholds.twoStars) return 2
   return 1
 }
 

@@ -21,6 +21,8 @@ export function GameBoard({ level, state, onTouchStart, onTouchEnd, resultOverla
     return [`${position.x},${position.y}`, obstacle] as const
   }))
   const remainingApplePositions = new Set(state.remainingApples.map((apple) => `${apple.x},${apple.y}`))
+  const bestRoutePositions = new Set(level.solutionPath.map(({ x, y }) => `${x},${y}`))
+  const alternateRoutePositions = new Set(level.alternatePath.map(({ x, y }) => `${x},${y}`))
   const butterflyCell = Array.from({ length: level.grid.rows * level.grid.columns }, (_, index) => ({
     x: index % level.grid.columns,
     y: Math.floor(index / level.grid.columns),
@@ -30,6 +32,18 @@ export function GameBoard({ level, state, onTouchStart, onTouchEnd, resultOverla
       !(level.portal.x === x && level.portal.y === y)
   })
   const wormPath = state.worm.map(({ x, y }) => `${x + 0.5},${y + 0.5}`).join(' ')
+  const wormBodySegments = state.worm.slice(1).map((segment, index) => {
+    const wormIndex = index + 1
+    const headSide = state.worm[wormIndex - 1]
+    const tailSide = state.worm[wormIndex + 1] ?? segment
+    const horizontal = Math.abs(tailSide.x - headSide.x) >= Math.abs(tailSide.y - headSide.y)
+    const x = segment.x + 0.5
+    const y = segment.y + 0.5
+    const stripe = horizontal
+      ? `M ${x} ${y - 0.2} L ${x} ${y + 0.2}`
+      : `M ${x - 0.2} ${y} L ${x + 0.2} ${y}`
+    return { key: `${segment.x},${segment.y},${wormIndex}`, x, y, stripe }
+  })
   const head = state.worm[0]
   const neck = state.worm[1]
   const headDirection = !neck || head.x > neck.x ? 'right' : head.x < neck.x ? 'left' : head.y > neck.y ? 'down' : 'up'
@@ -54,6 +68,8 @@ export function GameBoard({ level, state, onTouchStart, onTouchEnd, resultOverla
           const isHead = wormIndex === 0
           const isWorm = wormIndex !== undefined
           const isPortal = level.portal.x === x && level.portal.y === y
+          const isBestRoute = bestRoutePositions.has(key)
+          const isAlternateRoute = alternateRoutePositions.has(key) && !isBestRoute
           const hasApple = remainingApplePositions.has(key)
           const hasButterfly = butterflyCell?.x === x && butterflyCell.y === y
 
@@ -65,12 +81,14 @@ export function GameBoard({ level, state, onTouchStart, onTouchEnd, resultOverla
               aria-colindex={x + 1}
               aria-label={[
                 `Row ${y + 1}, column ${x + 1}`,
+                !obstacle ? 'walkable trail' : '',
+                isBestRoute ? 'best route to the exit' : isAlternateRoute ? 'scenic detour route' : '',
                 isHead ? 'worm head' : isWorm ? 'worm body' : '',
                 hasApple ? `${apple?.type ?? 'normal'} apple` : '',
                 isPortal ? 'exit portal' : '',
                 obstacle?.type === 'moving' ? 'flying bird hazard' : obstacle?.type === 'wall' ? 'wooden maze wall' : obstacle?.type ? `${obstacle.type} obstacle` : '',
               ].filter(Boolean).join(', ')}
-              className={`game-tile ${(x + y) % 2 === 0 ? 'tile-even' : 'tile-odd'} ${isWorm ? isHead ? 'tile-worm-head' : 'tile-worm-body' : ''} ${isPortal ? 'tile-portal' : ''} ${hasApple ? 'tile-apple' : ''} ${obstacle ? `tile-obstacle tile-${obstacle.type}` : ''}`}
+              className={`game-tile ${(x + y) % 2 === 0 ? 'tile-even' : 'tile-odd'} ${obstacle ? `tile-obstacle tile-${obstacle.type}` : 'tile-walkable'} ${isBestRoute ? 'tile-best-route' : ''} ${isAlternateRoute ? 'tile-alternate-route' : ''} ${isWorm ? isHead ? 'tile-worm-head' : 'tile-worm-body' : ''} ${isPortal ? 'tile-portal' : ''} ${hasApple ? 'tile-apple' : ''}`}
             >
               {isHead && (
                 <span className={`worm-face worm-face-${headDirection}`} aria-hidden="true">
@@ -80,7 +98,6 @@ export function GameBoard({ level, state, onTouchStart, onTouchEnd, resultOverla
                   <span className="worm-smile" />
                 </span>
               )}
-              {isWorm && !isHead && <span className="worm-scale" aria-hidden="true" />}
               {hasApple && apple && (
                 <span className={`apple-token ${apple.type === 'golden' ? 'apple-golden' : ''}`} aria-hidden="true">
                   <Apple />
@@ -119,8 +136,13 @@ export function GameBoard({ level, state, onTouchStart, onTouchEnd, resultOverla
             <polyline className="worm-path-shadow" points={wormPath} />
             <polyline className="worm-path-body" points={wormPath} style={{ stroke: `url(#worm-gradient-${level.id})` }} />
             <polyline className="worm-path-shine" points={wormPath} />
-            {state.worm.slice(1, -1).map((segment, index) => (
-              <circle key={`${segment.x},${segment.y},${index}`} className="worm-path-scale" cx={segment.x + 0.5} cy={segment.y + 0.5} r="0.11" />
+            {wormBodySegments.map(({ key, x, y, stripe }) => (
+              <g key={key} className="worm-body-segment">
+                <circle className="worm-segment-outline" cx={x} cy={y} r="0.34" />
+                <circle className="worm-segment-bead" cx={x} cy={y} r="0.29" />
+                <path className="worm-segment-stripe" d={stripe} />
+                <circle className="worm-segment-glint" cx={x - 0.1} cy={y - 0.11} r="0.055" />
+              </g>
             ))}
           </svg>
         )}
