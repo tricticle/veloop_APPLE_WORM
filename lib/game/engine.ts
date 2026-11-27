@@ -1,7 +1,8 @@
-import type { Coordinate, GameLevel } from './levels'
+import { getForestBugPosition, type Coordinate, type GameLevel } from './levels'
 
 export type Direction = 'up' | 'right' | 'down' | 'left'
 export type GameStatus = 'ready' | 'playing' | 'failed' | 'completed'
+export type FailureCause = 'edge' | 'moves' | 'thorn' | 'pit' | 'tail' | 'bird' | 'beetle'
 export type MoveEvent = 'moved' | 'apple' | 'blocked' | 'failed' | 'incomplete-portal' | 'completed'
 
 export type GameState = {
@@ -11,6 +12,7 @@ export type GameState = {
   moves: number
   score: number
   status: GameStatus
+  failureCause: FailureCause | null
   feedback: string
 }
 
@@ -27,6 +29,10 @@ export const DIRECTIONS = Object.keys(DIRECTION_DELTAS) as Direction[]
 
 const samePosition = (first: Coordinate, second: Coordinate) => first.x === second.x && first.y === second.y
 
+function failGame(state: GameState, failureCause: FailureCause, feedback: string): MoveResult {
+  return { state: { ...state, status: 'failed', failureCause, feedback }, event: 'failed' }
+}
+
 export function createInitialState(level: GameLevel): GameState {
   return {
     worm: level.wormStart.map((point) => ({ ...point })),
@@ -35,6 +41,7 @@ export function createInitialState(level: GameLevel): GameState {
     moves: 0,
     score: 0,
     status: 'ready',
+    failureCause: null,
     feedback: '',
   }
 }
@@ -42,10 +49,7 @@ export function createInitialState(level: GameLevel): GameState {
 export function moveGame(level: GameLevel, state: GameState, direction: Direction): MoveResult {
   if (state.status === 'failed' || state.status === 'completed') return { state, event: 'blocked' }
   if (state.moves >= level.moveLimit) {
-    return {
-      state: { ...state, status: 'failed', feedback: 'No moves left. Undo a step or restart the level.' },
-      event: 'failed',
-    }
+    return failGame(state, 'moves', 'No moves left. Undo a step or restart the level.')
   }
 
   const delta = DIRECTION_DELTAS[direction]
@@ -55,10 +59,7 @@ export function moveGame(level: GameLevel, state: GameState, direction: Directio
     nextHead.x < 0 || nextHead.x >= level.grid.columns || nextHead.y < 0 || nextHead.y >= level.grid.rows
 
   if (outsideBoard) {
-    return {
-      state: { ...state, status: 'failed', feedback: 'The trail slipped off the edge.' },
-      event: 'failed',
-    }
+    return failGame(state, 'edge', 'The trail slipped off the edge.')
   }
 
   const nextTurn = state.moves + 1
@@ -78,10 +79,14 @@ export function moveGame(level: GameLevel, state: GameState, direction: Directio
   }
 
   if (obstacle?.type === 'spike' || obstacle?.type === 'pit') {
-    return {
-      state: { ...state, status: 'failed', feedback: obstacle.type === 'pit' ? 'The trail fell into a hollow.' : 'A thorn patch ended this run.' },
-      event: 'failed',
-    }
+    return obstacle.type === 'pit'
+      ? failGame(state, 'pit', 'The trail fell into a hollow.')
+      : failGame(state, 'thorn', 'A thorn patch ended this run.')
+  }
+
+  const beetle = getForestBugPosition(level)
+  if (beetle && samePosition(beetle, nextHead)) {
+    return failGame(state, 'beetle', 'A hungry jungle beetle nipped you.')
   }
 
   const apple = state.remainingApples.find((item) => samePosition(item, nextHead))
@@ -89,10 +94,7 @@ export function moveGame(level: GameLevel, state: GameState, direction: Directio
   const occupiedBody = growing ? state.worm : state.worm.slice(0, -1)
 
   if (occupiedBody.some((segment) => samePosition(segment, nextHead))) {
-    return {
-      state: { ...state, status: 'failed', feedback: 'You crossed your own trail.' },
-      event: 'failed',
-    }
+    return failGame(state, 'tail', 'You crossed your own trail.')
   }
 
   const worm = [nextHead, ...state.worm.slice(0, growing ? state.worm.length : -1)]
@@ -102,8 +104,7 @@ export function moveGame(level: GameLevel, state: GameState, direction: Directio
     return worm.some((segment) => samePosition(segment, position))
   })
   if (movingBlockHit) {
-      return { state: { ...state, status: 'failed', feedback: 'A forest bird swooped across your trail.' }, event: 'failed' }
-
+    return failGame(state, 'bird', 'A forest bird swooped across your trail.')
   }
 
   const remainingApples = apple
@@ -117,7 +118,7 @@ export function moveGame(level: GameLevel, state: GameState, direction: Directio
 
   if (reachedPortal && objectiveComplete) {
     return {
-      state: { worm, remainingApples, collectedApples, moves, score: score + 100, status: 'completed', feedback: 'Portal reached. Level complete!' },
+      state: { worm, remainingApples, collectedApples, moves, score: score + 100, status: 'completed', failureCause: null, feedback: 'Portal reached. Level complete!' },
       event: 'completed',
     }
   }
@@ -129,7 +130,7 @@ export function moveGame(level: GameLevel, state: GameState, direction: Directio
       : ''
 
   return {
-    state: { worm, remainingApples, collectedApples, moves, score, status: 'playing', feedback },
+    state: { worm, remainingApples, collectedApples, moves, score, status: 'playing', failureCause: null, feedback },
     event: apple ? 'apple' : reachedPortal ? 'incomplete-portal' : 'moved',
   }
 }
@@ -157,6 +158,8 @@ export function findHintDirection(level: GameLevel, state: GameState): Direction
   const blocked = new Set(level.obstacles
     .filter((obstacle) => obstacle.type !== 'gate' || state.collectedApples < level.requiredApples - 1)
     .flatMap((obstacle) => (obstacle.path ?? [obstacle]).map(({ x, y }) => `${x},${y}`)))
+  const beetle = getForestBugPosition(level)
+  if (beetle) blocked.add(`${beetle.x},${beetle.y}`)
   const occupied = new Set(state.worm.slice(0, -1).map(({ x, y }) => `${x},${y}`))
   const start = state.worm[0]
   const queue: Array<{ point: Coordinate; firstDirection: Direction | null }> = [{ point: start, firstDirection: null }]

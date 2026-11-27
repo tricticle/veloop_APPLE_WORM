@@ -26,6 +26,36 @@ export type GameLevel = {
   alternatePath: Coordinate[]
 }
 
+export function getForestBugPosition(level: GameLevel): Coordinate | null {
+  const obstaclePositions = new Set(level.obstacles.flatMap((obstacle) =>
+    (obstacle.path ?? [obstacle]).map(({ x, y }) => `${x},${y}`),
+  ))
+  const protectedPositions = new Set([
+    ...level.solutionPath,
+    ...level.alternatePath,
+    ...level.wormStart,
+    ...level.apples,
+    level.portal,
+  ].map(({ x, y }) => `${x},${y}`))
+  const walkableCells = Array.from({ length: level.grid.rows * level.grid.columns }, (_, index) => ({
+    x: index % level.grid.columns,
+    y: Math.floor(index / level.grid.columns),
+  })).filter(({ x, y }) => {
+    const key = `${x},${y}`
+    return !obstaclePositions.has(key) && !protectedPositions.has(key)
+  })
+  const walkablePositions = new Set(walkableCells.map(({ x, y }) => `${x},${y}`))
+  const deadEnds = walkableCells.filter(({ x, y }) => [
+    { x: x + 1, y },
+    { x: x - 1, y },
+    { x, y: y + 1 },
+    { x, y: y - 1 },
+  ].filter(({ x: nextX, y: nextY }) => walkablePositions.has(`${nextX},${nextY}`)).length === 1)
+  const candidates = deadEnds.length ? deadEnds : walkableCells
+
+  return candidates.length ? candidates[(level.id - 1) % candidates.length] : null
+}
+
 type LevelTemplate = {
   name: string
   wormStart: Coordinate[]
