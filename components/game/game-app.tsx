@@ -13,6 +13,8 @@ import {
   Gamepad2,
   Gift,
   Leaf,
+  LockKeyhole,
+  LockOpen,
   LogOut,
   Map,
   Bird,
@@ -21,6 +23,7 @@ import {
   Sparkles,
   Star,
   SlidersHorizontal,
+  Target,
   Trophy,
   UserRound,
   Medal,
@@ -38,7 +41,7 @@ import { SettingsView } from '@/components/game/settings-view'
 import { LeaderboardView, type LeaderboardEntry } from '@/components/game/leaderboard-view'
 import { authClient } from '@/lib/auth-client'
 import { playGameSound, startAmbientMusic } from '@/lib/game/audio'
-import { calculateStars, createInitialState, findHintDirection, getStarThresholds, moveGame, type Direction, type FailureCause, type GameState, type MoveEvent } from '@/lib/game/engine'
+import { calculateStars, createInitialState, findHintDirection, getStarThresholds, isPortalReady, moveGame, type Direction, type FailureCause, type GameState, type MoveEvent } from '@/lib/game/engine'
 import { DEFAULT_ECONOMY_CONFIG, type EconomyConfig } from '@/lib/game/economy-config'
 import { LEVELS, type GameLevel } from '@/lib/game/levels'
 
@@ -160,6 +163,7 @@ export function GameApp({
   const isFailed = game.status === 'failed'
   const movementDisabled = isBusy || isFinished || isFailed
   const remainingObjective = Math.max(0, level.requiredApples - game.collectedApples)
+  const portalOpen = isPortalReady(level, game)
   const starThresholds = getStarThresholds(level)
   const failureStory = isFailed && game.failureCause ? failureStories[game.failureCause] : null
 
@@ -426,10 +430,9 @@ export function GameApp({
       <main className="page-content">
         <section className="page-intro" aria-labelledby="page-title">
           <div>
-            <p className="eyebrow"><span className="eyebrow-dot" /> A jungle trail adventure</p>
+            <p className="eyebrow">Jungle puzzle adventure</p>
             <h1 id="page-title">{displayViewHeading[activeView]}</h1>
-              <p className="page-subtitle">Guide your jungle friend along the wooden trail, gather apples, and dodge beetles and birds on the way to the moonlit portal.</p>
-
+            <p className="page-subtitle">Guide the snake through carved timber corridors, gather apples to grow, and time your turns past birds and beetles to reach the moonlit portal.</p>
           </div>
           <div className="journey-progress">
             <span className="journey-icon"><Leaf aria-hidden="true" /></span>
@@ -444,21 +447,29 @@ export function GameApp({
               <div className="level-heading-row">
                 <div className="level-number-block"><span>{String(level.id).padStart(2, '0')}</span></div>
                 <div className="level-title-copy">
-                  <p className="level-world">{level.world}</p>
+                  <p className="level-world">
+                    {level.world} <span aria-hidden="true">·</span> {level.difficulty.charAt(0) + level.difficulty.slice(1).toLowerCase()}
+                  </p>
                   <h2 id="level-heading">{level.name}</h2>
                 </div>
-                <span className={`difficulty-badge difficulty-${level.difficulty.toLowerCase()}`}>{level.difficulty}</span>
-                <Button variant="outline" size="sm" className="change-level-button" onClick={() => setActiveView('levels')}>Change level <ChevronRight data-icon="inline-end" aria-hidden="true" /></Button>
+                <Button variant="outline" size="sm" className="change-level-button" onClick={() => setActiveView('levels')}>All levels <ChevronRight data-icon="inline-end" aria-hidden="true" /></Button>
               </div>
 
               <article className="game-card" aria-label={`${levelHeading(level)} gameplay`}>
                 <div className="game-card-header">
                   <div className="objective-display">
-                    <span className="objective-label">Current objective</span>
-                    <strong><Apple aria-hidden="true" /> {game.collectedApples} <span>/ {level.requiredApples} apples</span></strong>
+                    <span className="objective-label">Objective</span>
+                    <div className="objective-metrics">
+                      <strong><Apple aria-hidden="true" /> {game.collectedApples} <span>/ {level.requiredApples} apples</span></strong>
+                      <span className={`portal-status-text ${portalOpen ? 'portal-status-open' : 'portal-status-sealed'}`}>
+                        {portalOpen ? <LockOpen aria-hidden="true" /> : <LockKeyhole aria-hidden="true" />}
+                        {portalOpen ? 'Portal open' : `${remainingObjective} left to unlock`}
+                      </span>
+                    </div>
                   </div>
                   <div className="quick-stats">
                     <div className="quick-stat"><Footprints aria-hidden="true" /><span>Moves</span><strong>{game.moves}<small>/{level.moveLimit}</small></strong></div>
+                    <div className="quick-stat"><Target aria-hidden="true" /><span>Par</span><strong>≤{starThresholds.threeStars}</strong></div>
                     <div className="quick-stat"><Star aria-hidden="true" /><span>Score</span><strong>{game.score}</strong></div>
                   </div>
                 </div>
@@ -469,6 +480,8 @@ export function GameApp({
                 <GameBoard
                   level={level}
                   state={game}
+                  hintDirection={hintDirection}
+                  onMove={handleMove}
                   onTouchStart={handleTouchStart}
                   onTouchEnd={handleTouchEnd}
                   resultOverlay={(isFailed || isFinished && completion) && (
@@ -561,14 +574,15 @@ export function GameApp({
                   </li>
                 </ol>
                 <div className="trail-divider" />
-                <div className="tile-legend" aria-label="Two possible trails and board markers">
-                  <span><i className="legend-walkable legend-route-a" aria-hidden="true">A</i> Route A</span>
-                  <span><i className="legend-alternate legend-route-b" aria-hidden="true">B</i> Route B</span>
-                  <span><i className="legend-wall"><span /></i> Maze wall</span>
+                <div className="tile-legend" aria-label="Board markers and hazards">
+                  <span><i className="legend-walkable legend-route-a" aria-hidden="true">A</i> Shortest path</span>
+                  <span><i className="legend-alternate legend-route-b" aria-hidden="true">B</i> Detour</span>
+                  <span><i className="legend-wall"><span /></i> Timber wall</span>
                   <span><i className="legend-apple"><Apple aria-hidden="true" /></i> Apple</span>
                   <span><i className="legend-portal"><Sparkles aria-hidden="true" /></i> Portal</span>
-                  <span><i className="legend-spike"><span /></i> Hazard</span>
-                  <span><i className="legend-moving"><Bird aria-hidden="true" /></i> Flying bird</span>
+                  <span><i className="legend-gate"><LockKeyhole aria-hidden="true" /></i> Gate</span>
+                  <span><i className="legend-spike"><span /></i> Thorns</span>
+                  <span><i className="legend-moving"><Bird aria-hidden="true" /></i> Swoop bird</span>
                   <span><i className="legend-beetle"><Bug aria-hidden="true" /></i> Beetle</span>
                 </div>
                 <section className="star-rating-guide" aria-label="Star ratings based on moves">

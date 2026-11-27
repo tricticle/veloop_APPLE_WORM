@@ -2946,7 +2946,7 @@ input:focus-visible {
 body {
   background: #f0e7d5;
   color: var(--foreground);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Plus Jakarta Sans", "DM Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .game-shell {
@@ -3191,7 +3191,7 @@ body {
 }
 
 .game-card-header {
-  padding: 12px 18px 11px;
+  padding: 14px 20px 13px;
   border-bottom-color: #e8dcc2;
   background: linear-gradient(180deg, #fffaf0, #f7efdd);
 }
@@ -3201,88 +3201,168 @@ body {
   color: #877b63;
 }
 
+.objective-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
 .objective-display strong {
   color: #294a32;
+  font-variant-numeric: tabular-nums;
+}
+
+.portal-status-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.portal-status-text svg {
+  width: 12px;
+  height: 12px;
+}
+
+.portal-status-sealed {
+  color: #7d6d52;
+}
+
+.portal-status-open {
+  color: #2f6c3d;
+}
+
+.quick-stats {
+  gap: 16px;
 }
 
 .quick-stat strong {
   color: #3f5c42;
+  font-variant-numeric: tabular-nums;
+}
+
+.level-number-block,
+.level-tile-number,
+.coin-balance strong,
+.wallet-total strong,
+.star-rating-row strong {
+  font-variant-numeric: tabular-nums;
 }
 
 .board-frame {
   position: relative;
-  width: min(100% - 40px, 400px);
-  margin-top: 8px;
-  padding: 9px;
-  border: 4px solid #9b6939;
-  border-radius: 19px;
-  background: linear-gradient(135deg, rgba(255, 223, 157, 0.22), rgba(54, 30, 18, 0.12)), url('/jungle-wood-texture.png') center / cover;
-  box-shadow: inset 0 0 0 2px rgba(255, 220, 151, 0.42), 0 5px 0 #593a22, 0 14px 25px rgba(44, 35, 22, 0.22);
+  width: min(100% - 32px, 464px);
+  margin-top: 12px;
+  padding: 10px;
+  border: 4px solid #8f5f32;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255, 223, 157, 0.22), rgba(54, 30, 18, 0.14)), url('/jungle-wood-texture.png') center / cover;
+  box-shadow: inset 0 0 0 2px rgba(255, 220, 151, 0.4), 0 5px 0 #593a22, 0 14px 26px rgba(44, 35, 22, 0.22);
 }
 
 .board-frame::before {
   position: absolute;
-  z-index: 5;
+  z-index: 6;
   inset: 5px;
-  border: 1px solid rgba(255, 229, 177, 0.3);
-  border-radius: 11px;
+  border: 1px solid rgba(255, 229, 177, 0.28);
+  border-radius: 12px;
   content: "";
   pointer-events: none;
 }
 
 .game-board {
   position: relative;
-  gap: clamp(2px, 0.35vw, 4px);
+  gap: 0;
   overflow: hidden;
-  border: 2px solid rgba(77, 49, 26, 0.8);
+  border: 2px solid rgba(72, 45, 23, 0.85);
   border-radius: 11px;
-  background: linear-gradient(rgba(89, 53, 24, 0.11), rgba(60, 43, 24, 0.15)), url('/jungle-wood-texture.png') center / 100% 100%;
-  box-shadow: inset 0 2px 9px rgba(39, 25, 12, 0.3), 0 1px 0 rgba(255, 224, 171, 0.45);
+  background: linear-gradient(rgba(89, 53, 24, 0.12), rgba(60, 43, 24, 0.16)), url('/jungle-wood-texture.png') center / 100% 100%;
+  box-shadow: inset 0 2px 10px rgba(39, 25, 12, 0.34), 0 1px 0 rgba(255, 224, 171, 0.45);
 }
 
 .game-tile {
+  position: relative;
   overflow: visible;
-  border-right: 1px solid rgba(68, 43, 22, 0.16);
-  border-bottom: 1px solid rgba(68, 43, 22, 0.17);
+  border-right: 1px solid rgba(85, 62, 34, 0.12);
+  border-bottom: 1px solid rgba(85, 62, 34, 0.13);
   border-radius: 0;
   background: rgba(211, 163, 91, 0.16);
-  box-shadow: inset 0 0 0 1px rgba(255, 225, 165, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 232, 185, 0.06);
 }
 
 .tile-even {
   background: rgba(245, 206, 137, 0.15);
-  box-shadow: inset 0 0 0 1px rgba(255, 232, 185, 0.08);
 }
 
 .tile-odd {
   background: rgba(68, 89, 42, 0.1);
-  box-shadow: inset 0 0 0 1px rgba(255, 232, 185, 0.05);
+}
+
+.tile-clickable-step {
+  cursor: pointer;
+}
+
+.tile-clickable-step:hover::after {
+  position: absolute;
+  z-index: 2;
+  inset: 4px;
+  border: 2px dashed rgba(62, 136, 66, 0.5);
+  border-radius: 8px;
+  background: rgba(162, 230, 114, 0.12);
+  content: "";
+  pointer-events: none;
+}
+
+.tile-hint-target::after {
+  position: absolute;
+  z-index: 2;
+  inset: 3px;
+  border: 2px solid rgba(219, 164, 46, 0.9);
+  border-radius: 9px;
+  background: rgba(255, 236, 168, 0.28);
+  content: "";
+  pointer-events: none;
+}
+
+.board-hint-marker {
+  position: relative;
+  z-index: 6;
+  display: grid;
+  width: 54%;
+  height: 54%;
+  place-items: center;
+  border: 1.5px solid #c28e27;
+  border-radius: 50%;
+  background: rgba(255, 245, 200, 0.92);
+  color: #7c5612;
+  box-shadow: 0 2px 6px rgba(132, 92, 21, 0.35);
+  animation: hint-pulse 1.1s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.board-hint-marker svg {
+  width: 66%;
+  height: 66%;
+  stroke-width: 2.6;
 }
 
 .tile-worm-body,
 .tile-worm-head {
-  background: transparent;
-  box-shadow: none;
-  animation: worm-pop 180ms ease-out both;
-}
-
-.tile-worm-body {
   z-index: 2;
-}
-
-.tile-worm-head {
-  z-index: 3;
 }
 
 .tile-apple,
 .tile-portal,
 .tile-obstacle {
-  z-index: 4;
+  z-index: 3;
 }
 
 .worm-path-overlay {
   position: absolute;
-  z-index: 1;
+  z-index: 5;
   inset: 0;
   width: 100%;
   height: 100%;
@@ -3299,130 +3379,42 @@ body {
 }
 
 .worm-path-shadow {
-  stroke: #0e4b24;
-  stroke-width: 0.82;
-  filter: drop-shadow(0 0.06px 0.04px rgba(12, 34, 14, 0.7));
+  stroke: rgba(13, 56, 25, 0.85);
+  stroke-width: 0.7;
+  transform: translateY(0.04px);
 }
 
 .worm-path-body {
-  stroke: #42b941;
-  stroke-width: 0.66;
+  stroke-width: 0.56;
 }
 
 .worm-path-shine {
-  stroke: rgba(205, 255, 143, 0.48);
+  stroke: rgba(214, 255, 164, 0.52);
   stroke-width: 0.08;
-  transform: translateY(-0.15px);
+  transform: translateY(-0.11px);
 }
 
-.worm-path-scale {
-  fill: rgba(15, 92, 34, 0.48);
-  stroke: rgba(178, 244, 116, 0.46);
-  stroke-width: 0.025;
-}
-
-.worm-face {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+.worm-svg-head {
+  transform-box: fill-box;
   transform-origin: center;
-  animation: worm-blink 4s ease-in-out infinite;
 }
 
-.worm-face-left {
-  transform: rotate(180deg);
-}
-
-.worm-face-up {
-  transform: rotate(-90deg);
-}
-
-.worm-face-down {
-  transform: rotate(90deg);
-}
-
-.worm-eye {
-  top: 17%;
-  width: 31%;
-  height: 44%;
-  border: 2px solid #164b29;
-  background: #fffdf2;
-  box-shadow: inset 0 -2px 0 rgba(29, 68, 34, 0.12), 0 1px 2px rgba(6, 39, 16, 0.25);
-}
-
-.worm-eye::after {
-  top: calc(50% + var(--worm-gaze-y, 0%));
-  right: auto;
-  bottom: auto;
-  left: calc(50% + var(--worm-gaze-x, 0%));
-  width: 38%;
-  height: 38%;
-  transform: translate(-50%, -50%);
-  transition: left 140ms ease, top 140ms ease;
-  background: #173d25;
-  box-shadow: -1px -1px 0 1px rgba(255, 255, 255, 0.96);
-}
-
-.worm-eye-left {
-  left: 18%;
-}
-
-.worm-eye-right {
-  right: 18%;
-}
-
-.worm-cheek {
-  position: absolute;
-  right: 8%;
-  bottom: 25%;
-  width: 15%;
-  height: 8%;
-  border-radius: 50%;
-  background: rgba(255, 129, 93, 0.62);
-  filter: blur(1px);
-}
-
-.worm-smile {
-  bottom: 18%;
-  left: 52%;
-  width: 28%;
-  height: 12%;
-  border-bottom: 2px solid #174a29;
-  border-radius: 0 0 50% 50%;
-}
-
-.worm-scale {
-  width: 18%;
-  height: 18%;
-  border: 1px solid rgba(191, 255, 128, 0.4);
-  border-radius: 50%;
-  background: rgba(13, 111, 43, 0.42);
-  box-shadow: 0 0 3px rgba(181, 246, 110, 0.4);
-}
-
-.wildlife-butterfly {
-  position: absolute;
-  z-index: 5;
-  right: 13%;
-  bottom: 13%;
-  width: 32%;
-  height: 32%;
-  color: #ffe08a;
-  filter: drop-shadow(0 1px 3px rgba(32, 29, 11, 0.5));
-  animation: butterfly-drift 3s ease-in-out infinite;
+.worm-tongue {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: worm-tongue-flick 2.8s ease-in-out infinite;
 }
 
 .tile-apple {
-  background-color: rgba(255, 201, 111, 0.25);
+  background-color: rgba(255, 201, 111, 0.22);
 }
 
 .apple-token {
-  border: 1px solid #9a3026;
-  background: radial-gradient(circle at 31% 25%, #ff9a67, #ed4834 52%, #b92827);
+  border: 1.5px solid #962c22;
+  background: radial-gradient(circle at 31% 25%, #ff9a67, #ed4834 52%, #b52524);
   color: #fff2d9;
-  filter: drop-shadow(0 3px 2px rgba(66, 28, 17, 0.45));
-  animation: apple-bob 2.8s ease-in-out infinite;
+  filter: drop-shadow(0 3px 3px rgba(66, 28, 17, 0.4));
+  animation: apple-bob 2.6s ease-in-out infinite;
 }
 
 .apple-token > svg:first-child {
@@ -3432,66 +3424,185 @@ body {
 }
 
 .apple-golden {
-  border-color: #9d6c20;
-  background: radial-gradient(circle at 31% 25%, #fff09d, #e7ad35 55%, #a96c1c);
-  color: #fff7ca;
+  border-color: #9c6a1b;
+  background: radial-gradient(circle at 31% 25%, #fff2a6, #ebb138 55%, #a86b1a);
+  color: #fff8cf;
+  box-shadow: 0 0 12px rgba(242, 189, 66, 0.55);
 }
 
 .apple-golden > svg:first-child {
-  fill: #f0c34f;
+  fill: #f2c552;
 }
 
 .tile-portal {
-  background-color: rgba(126, 114, 171, 0.26);
+  background-color: rgba(114, 102, 158, 0.2);
+}
+
+.tile-portal-ready {
+  background-color: rgba(126, 178, 112, 0.26);
 }
 
 .portal-token {
-  border: 2px solid #f5d994;
-  background: radial-gradient(circle at center, #9e87ec 0 17%, #3e3a72 45%, #252346 72%);
-  color: #fff1ae;
-  box-shadow: 0 0 0 3px rgba(224, 195, 110, 0.62), 0 0 13px rgba(149, 126, 227, 0.76), 0 4px 8px rgba(34, 26, 58, 0.4);
+  position: relative;
+  display: grid;
+  width: 76%;
+  height: 76%;
+  place-items: center;
+  border-radius: 50%;
 }
 
-.portal-core {
-  background: #fff8c9;
-  box-shadow: 0 0 10px #ffec9b;
+.portal-sealed {
+  border: 2px solid rgba(196, 185, 224, 0.65);
+  background: radial-gradient(circle at center, #5e5888 0 26%, #363358 58%, #24223d 85%);
+  color: rgba(226, 218, 250, 0.72);
+  box-shadow: 0 0 0 2px rgba(154, 142, 194, 0.35), 0 3px 6px rgba(28, 22, 46, 0.35);
+}
+
+.portal-sealed .portal-core {
+  width: 24%;
+  height: 24%;
+  background: #cfc6eb;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.portal-lock-count {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  display: grid;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 3px;
+  place-items: center;
+  border: 1.5px solid #fff5db;
+  border-radius: 999px;
+  background: #9f4638;
+  color: #fff9ee;
+  font-size: 9px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.portal-ready {
+  border: 2px solid #f7df99;
+  background: radial-gradient(circle at center, #b19cf2 0 22%, #475888 50%, #243b49 78%);
+  color: #fff3b5;
+  box-shadow: 0 0 0 3px rgba(235, 206, 117, 0.68), 0 0 16px rgba(139, 219, 152, 0.72), 0 4px 10px rgba(34, 26, 58, 0.42);
+  animation: portal-glow 2s ease-in-out infinite;
+}
+
+.portal-ready > svg {
+  animation: portal-spin 8s linear infinite;
+}
+
+.portal-ready .portal-core {
+  background: #fffbe0;
+  box-shadow: 0 0 12px #ffec9b, 0 0 20px rgba(173, 255, 183, 0.7);
 }
 
 .tile-obstacle {
-  background-color: rgba(98, 61, 33, 0.34);
+  background-color: rgba(98, 61, 33, 0.3);
 }
 
-.obstacle-wall-icon {
-  fill: #8d5c34;
-  color: #f1c27b;
-  filter: drop-shadow(0 2px 2px rgba(47, 31, 18, 0.45));
+.tile-gate-open {
+  background-color: rgba(122, 178, 102, 0.22) !important;
 }
 
-.obstacle-spike-icon {
-  fill: #b64c37;
-  color: #f9d39a;
-  filter: drop-shadow(0 2px 2px rgba(47, 31, 18, 0.4));
+.gate-locked-token,
+.gate-open-token,
+.spike-cluster,
+.bird-token,
+.beetle-token {
+  position: relative;
+  display: grid;
+  width: 74%;
+  height: 74%;
+  place-items: center;
+  border-radius: 10px;
+}
+
+.gate-locked-token {
+  border: 1.5px solid rgba(232, 190, 112, 0.45);
+  background: linear-gradient(145deg, rgba(84, 59, 34, 0.85), rgba(53, 35, 19, 0.9));
+  box-shadow: inset 0 1px 0 rgba(255, 224, 166, 0.25);
+}
+
+.gate-open-token {
+  border: 1.5px dashed rgba(73, 138, 66, 0.55);
+  background: rgba(214, 240, 190, 0.55);
 }
 
 .obstacle-gate-icon {
-  color: #f4cf7f;
-  filter: drop-shadow(0 1px 2px rgba(47, 31, 18, 0.4));
+  width: 68%;
+  height: 68%;
+  color: #f6d486;
+  filter: drop-shadow(0 1px 2px rgba(47, 31, 18, 0.45));
+}
+
+.obstacle-gate-open-icon {
+  width: 64%;
+  height: 64%;
+  color: #326c3b;
+}
+
+.obstacle-spike-icon {
+  width: 74%;
+  height: 74%;
+  fill: #bd4c36;
+  color: #fad69e;
+  filter: drop-shadow(0 2px 2px rgba(47, 31, 18, 0.45));
+}
+
+.bird-token {
+  border: 1.5px solid rgba(255, 226, 138, 0.52);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(235, 145, 51, 0.38), rgba(92, 54, 24, 0.65));
 }
 
 .obstacle-moving-icon {
-  color: #ffe387;
-  fill: rgba(236, 145, 51, 0.28);
+  width: 72%;
+  height: 72%;
+  color: #ffe694;
+  fill: rgba(242, 164, 70, 0.42);
   filter: drop-shadow(0 2px 3px rgba(47, 31, 18, 0.55));
   animation: bird-flit 1.25s ease-in-out infinite;
 }
 
+.bird-next-marker {
+  position: absolute;
+  z-index: 2;
+  width: 58%;
+  height: 58%;
+  border: 2px dashed rgba(214, 132, 42, 0.72);
+  border-radius: 50%;
+  background: rgba(255, 210, 128, 0.16);
+  pointer-events: none;
+}
+
+.tile-beetle {
+  background-color: rgba(214, 152, 52, 0.24);
+}
+
+.beetle-token {
+  border: 1.5px solid rgba(154, 98, 24, 0.65);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #7d5426, #4a3015);
+  box-shadow: 0 2px 4px rgba(42, 27, 10, 0.4);
+}
+
 .pit-token {
-  border-color: #bf9963;
-  background: radial-gradient(circle, #131b1b 0 44%, #273b2a 58%, #806344 72%, #e1ba7c 100%);
-  box-shadow: inset 0 4px 7px rgba(0, 0, 0, 0.72), 0 1px 0 rgba(255, 226, 173, 0.45);
+  width: 66%;
+  height: 66%;
+  border: 3px solid #bf9963;
+  border-radius: 50%;
+  background: radial-gradient(circle, #111818 0 46%, #243627 62%, #7d6041 78%, #e1ba7c 100%);
+  box-shadow: inset 0 4px 7px rgba(0, 0, 0, 0.75), 0 1px 0 rgba(255, 226, 173, 0.45);
 }
 
 .board-progress-row {
+  width: min(100% - 32px, 464px);
   color: #867756;
 }
 
@@ -3508,12 +3619,25 @@ body {
 }
 
 .game-controls-wrap {
-  padding-top: 14px;
+  padding: 14px 18px 18px;
+}
+
+.direction-pad {
+  position: relative;
+  display: grid;
+  width: 134px;
+  grid-template-columns: repeat(3, 42px);
+  grid-template-rows: repeat(2, 40px);
+  gap: 4px;
 }
 
 .direction-button {
+  width: 42px;
+  height: 40px;
+  min-width: 42px;
   border-color: #b4c39b;
-  background: linear-gradient(180deg, #f1f5e8, #dfe9d4);
+  border-radius: 11px;
+  background: linear-gradient(180deg, #f3f7eb, #e0ead5);
   color: #315b38;
   box-shadow: 0 3px 0 #b2c09b;
 }
@@ -3530,9 +3654,13 @@ body {
 }
 
 .utility-button {
+  height: 38px;
+  padding-inline: 12px;
   border-color: #ddcfb3;
+  border-radius: 10px;
   background: #fffaf0;
   color: #52634a;
+  font-size: 11px;
   box-shadow: 0 2px 0 #e8ddc6;
 }
 
@@ -3960,10 +4088,6 @@ body {
   box-shadow: inset 0 1px 0 rgba(255, 255, 245, 0.88), inset 0 -3px 0 rgba(107, 132, 66, 0.16);
 }
 
-.game-tile.tile-worm-head {
-  z-index: 3;
-}
-
 .tile-walkable.tile-odd {
   background: linear-gradient(145deg, #e8edce, #d5e1ad 58%, #c5d596);
 }
@@ -4217,68 +4341,34 @@ body {
 }
 
 .game-tile.tile-walkable.tile-best-route:not(.tile-apple):not(.tile-portal) {
-  border-color: rgba(89, 130, 62, 0.64);
-  background: linear-gradient(145deg, #f5f6d9, #e6edb3 58%, #d4e19a);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 246, 0.92), inset 0 -3px 0 rgba(92, 124, 54, 0.2), inset 0 0 0 2px rgba(130, 163, 78, 0.14);
+  border-color: rgba(110, 146, 64, 0.26);
+  background: linear-gradient(145deg, #f4f5db, #e4ecb6 58%, #d4e09e);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 246, 0.9), inset 0 -2px 0 rgba(92, 124, 54, 0.14);
 }
 
 .game-tile.tile-walkable.tile-alternate-route {
-  border: 2px dashed rgba(181, 132, 42, 0.82);
-  background:
-    repeating-linear-gradient(135deg, rgba(206, 157, 60, 0.16) 0 3px, transparent 3px 7px),
-    linear-gradient(145deg, #f8efca, #e9dfa9);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 244, 0.88), inset 0 -3px 0 rgba(156, 119, 42, 0.17);
-}
-
-.game-tile.tile-walkable.tile-best-route:not(.tile-apple):not(.tile-portal) {
-  box-shadow: inset 0 0 0 2px rgba(110, 146, 64, 0.34), inset 0 1px 0 rgba(255, 255, 246, 0.92), inset 0 -3px 0 rgba(92, 124, 54, 0.2);
+  border-color: rgba(181, 132, 42, 0.34);
+  background: linear-gradient(145deg, #f7efd0, #eae0ad);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 244, 0.85), inset 0 -2px 0 rgba(156, 119, 42, 0.14), inset 0 0 0 1.5px rgba(181, 132, 42, 0.28);
 }
 
 .worm-path-shadow {
-  stroke: #155128;
-  stroke-width: 0.86;
-  filter: drop-shadow(0 0.08px 0.05px rgba(10, 34, 13, 0.62));
-}
-
-.worm-path-body {
+  stroke: rgba(13, 56, 25, 0.84);
   stroke-width: 0.7;
 }
 
+.worm-path-body {
+  stroke-width: 0.56;
+}
+
 .worm-path-shine {
-  stroke: rgba(214, 255, 166, 0.32);
-  stroke-width: 0.1;
-}
-
-.worm-face {
-  inset: 8% 0;
-  width: auto;
-  height: auto;
-  border: 1px solid #155128;
-  border-radius: 12% 46% 46% 12% / 42% 42% 42% 42%;
-  background: #42b941;
-  box-shadow: inset 0 2px 0 rgba(205, 255, 143, 0.4), inset 0 -3px 0 rgba(24, 82, 37, 0.22), 0 2px 3px rgba(21, 60, 27, 0.28);
-  animation: worm-head-glow 2.4s ease-in-out infinite;
-}
-
-.worm-eye {
-  transform-origin: center;
-  animation: worm-eye-blink 4s ease-in-out infinite;
-}
-
-.worm-face::before {
-  position: absolute;
-  top: 11%;
-  left: 16%;
-  width: 35%;
-  height: 10%;
-  border-radius: 999px;
-  background: rgba(245, 255, 219, 0.58);
-  content: "";
+  stroke: rgba(221, 255, 174, 0.54);
+  stroke-width: 0.08;
 }
 
 .legend-alternate {
-  border: 1px dashed #ae7d29;
-  background: repeating-linear-gradient(135deg, rgba(206, 157, 60, 0.24) 0 3px, transparent 3px 6px), #f1e3b6;
+  border: 1px solid rgba(181, 132, 42, 0.55);
+  background: linear-gradient(145deg, #f7efd0, #eae0ad);
 }
 
 .world-group {
@@ -4378,28 +4468,19 @@ body {
   }
 }
 
-.worm-eye {
-  animation: worm-eye-blink 4.4s ease-in-out infinite;
+.worm-body-segment {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: worm-segment-pulse 1.8s ease-in-out infinite;
 }
 
-.worm-face-failed .worm-smile {
-  bottom: 18%;
-  border-top: 2px solid #174a29;
-  border-bottom: 0;
-  border-radius: 50% 50% 0 0;
+.worm-path-shine {
+  stroke-dasharray: 0.03 0.62;
+  animation: worm-shimmer 1.4s linear infinite;
 }
 
 .game-board-failed {
   animation: board-impact 360ms ease-out both;
-}
-
-.game-board-failed .tile-worm-head {
-  transform-origin: center;
-  animation: worm-hit 520ms ease-out both;
-}
-
-.game-board-failed .worm-eye {
-  animation: worm-dizzy-eyes 560ms ease-in-out 1;
 }
 
 .game-board-failed-beetle .wildlife-beetle {
@@ -4411,20 +4492,21 @@ body {
 }
 
 .wildlife-beetle {
-  position: absolute;
-  z-index: 5;
-  right: 10%;
-  bottom: 10%;
-  width: 43%;
-  height: 43%;
-  color: #ffd170;
-  filter: drop-shadow(0 2px 2px rgba(42, 27, 10, 0.6));
+  width: 68%;
+  height: 68%;
+  color: #ffd778;
+  filter: drop-shadow(0 1px 2px rgba(42, 27, 10, 0.6));
   animation: beetle-scuttle 1.5s ease-in-out infinite;
 }
 
 .legend-beetle {
   background: #fff1cc;
   color: #a36d1b;
+}
+
+.legend-gate {
+  background: #efe5cf;
+  color: #7c5c29;
 }
 
 .legend-route-a {
@@ -4439,14 +4521,28 @@ body {
   font-weight: 850;
 }
 
-@keyframes worm-eye-blink {
-  0%, 44%, 48%, 100% { transform: scaleY(1); }
-  46%, 47% { transform: scaleY(0.08); }
+@keyframes worm-tongue-flick {
+  0%, 72%, 100% { opacity: 0; transform: scaleX(0.4); }
+  76%, 88% { opacity: 1; transform: scaleX(1); }
+  82% { opacity: 0.7; transform: scaleX(0.75); }
 }
 
-@keyframes worm-head-glow {
-  0%, 100% { filter: drop-shadow(0 1px 1px rgba(27, 73, 32, 0.12)); }
-  50% { filter: drop-shadow(0 1px 4px rgba(193, 255, 124, 0.62)); }
+@keyframes hint-pulse {
+  0%, 100% { transform: scale(0.95); }
+  50% { transform: scale(1.07); }
+}
+
+@keyframes portal-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes worm-segment-pulse {
+  0%, 100% { opacity: 0.96; }
+  50% { opacity: 1; }
+}
+
+@keyframes worm-shimmer {
+  to { stroke-dashoffset: -1.3; }
 }
 
 @keyframes board-impact {
@@ -4456,39 +4552,46 @@ body {
   78% { transform: translateX(-1px); }
 }
 
-@keyframes worm-hit {
-  0%, 100% { filter: saturate(1); }
-  25% { filter: saturate(0.45) brightness(1.22); }
-  55% { filter: saturate(0.7); }
-}
-
-@keyframes worm-dizzy-eyes {
-  0%, 100% { transform: scaleY(1); }
-  45% { transform: scaleY(0.12); }
-  70% { transform: scaleY(0.82); }
-}
-
 @keyframes beetle-scuttle {
   0%, 100% { transform: translateY(0) rotate(-6deg); }
-  50% { transform: translateY(-3px) rotate(8deg); }
+  50% { transform: translateY(-2px) rotate(6deg); }
 }
 
 @keyframes beetle-nip {
   0%, 100% { transform: translate(0, 0) rotate(0); }
-  35% { transform: translate(-4px, 2px) rotate(-18deg) scale(1.12); }
-  70% { transform: translate(2px, -2px) rotate(12deg) scale(0.92); }
+  35% { transform: translate(-3px, 1px) rotate(-14deg) scale(1.1); }
+  70% { transform: translate(2px, -1px) rotate(10deg) scale(0.94); }
+}
+
+@media (max-width: 640px) {
+  .board-frame {
+    width: min(100% - 20px, 440px);
+  }
+
+  .direction-pad {
+    width: 146px;
+    grid-template-columns: repeat(3, 46px);
+    grid-template-rows: repeat(2, 44px);
+    gap: 4px;
+  }
+
+  .direction-button {
+    width: 46px;
+    height: 44px;
+    min-width: 46px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .worm-face,
-  .worm-eye,
-  .worm-eye::after,
+  .worm-tongue,
+  .board-hint-marker,
+  .worm-body-segment,
+  .worm-path-shine,
   .wildlife-beetle,
   .game-board-failed,
-  .game-board-failed .tile-worm-head,
-  .game-board-failed-beetle .wildlife-beetle,
   .apple-token,
   .portal-token,
+  .portal-ready > svg,
   .level-tile {
     animation: none;
     transition: none;

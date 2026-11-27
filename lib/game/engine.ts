@@ -29,6 +29,31 @@ export const DIRECTIONS = Object.keys(DIRECTION_DELTAS) as Direction[]
 
 const samePosition = (first: Coordinate, second: Coordinate) => first.x === second.x && first.y === second.y
 
+export function isGateUnlocked(level: GameLevel, collectedApples: number): boolean {
+  return collectedApples >= level.requiredApples
+}
+
+export function isPortalReady(level: GameLevel, state: GameState): boolean {
+  return state.collectedApples >= level.requiredApples && state.worm.length >= level.targetLength
+}
+
+export function getObstaclePositionAtTurn(obstacle: GameLevel['obstacles'][number], turn: number): Coordinate {
+  if (obstacle.type === 'moving' && obstacle.path?.length) {
+    return obstacle.path[turn % obstacle.path.length]
+  }
+  return obstacle
+}
+
+export function getDirectionBetween(from: Coordinate, to: Coordinate): Direction | null {
+  const dx = to.x - from.x
+  const dy = to.y - from.y
+  if (dx === 1 && dy === 0) return 'right'
+  if (dx === -1 && dy === 0) return 'left'
+  if (dx === 0 && dy === 1) return 'down'
+  if (dx === 0 && dy === -1) return 'up'
+  return null
+}
+
 function failGame(state: GameState, failureCause: FailureCause, feedback: string): MoveResult {
   return { state: { ...state, status: 'failed', failureCause, feedback }, event: 'failed' }
 }
@@ -59,34 +84,32 @@ export function moveGame(level: GameLevel, state: GameState, direction: Directio
     nextHead.x < 0 || nextHead.x >= level.grid.columns || nextHead.y < 0 || nextHead.y >= level.grid.rows
 
   if (outsideBoard) {
-    return failGame(state, 'edge', 'The trail slipped off the edge.')
+    return failGame(state, 'edge', 'The snake slipped off the edge of the board.')
   }
 
   const nextTurn = state.moves + 1
-  const obstacle = level.obstacles.find((item) => {
-    const position = item.type === 'moving' && item.path?.length
-      ? item.path[nextTurn % item.path.length]
-      : item
-    return samePosition(position, nextHead)
-  })
-  if (obstacle?.type === 'wall' || obstacle?.type === 'moving' || obstacle?.type === 'gate' && state.collectedApples < level.requiredApples - 1) {
+  const obstacle = level.obstacles.find((item) => samePosition(getObstaclePositionAtTurn(item, nextTurn), nextHead))
+  const gateLocked = obstacle?.type === 'gate' && !isGateUnlocked(level, state.collectedApples)
+
+  if (obstacle?.type === 'wall' || obstacle?.type === 'moving' || gateLocked) {
+    const remaining = Math.max(1, level.requiredApples - state.collectedApples)
     const feedback = obstacle.type === 'gate'
-      ? 'The gate needs one more apple.'
+      ? `The mossy gate needs ${remaining} more ${remaining === 1 ? 'apple' : 'apples'} to unlock.`
       : obstacle.type === 'moving'
         ? 'A forest bird swooped across that tile.'
-        : 'A stone wall blocks that tile.'
+        : 'A carved wooden wall blocks that tile.'
     return { state: { ...state, feedback }, event: 'blocked' }
   }
 
   if (obstacle?.type === 'spike' || obstacle?.type === 'pit') {
     return obstacle.type === 'pit'
-      ? failGame(state, 'pit', 'The trail fell into a hollow.')
-      : failGame(state, 'thorn', 'A thorn patch ended this run.')
+      ? failGame(state, 'pit', 'The snake fell into a burrow hollow.')
+      : failGame(state, 'thorn', 'A bramble patch ended this run.')
   }
 
   const beetle = getForestBugPosition(level)
   if (beetle && samePosition(beetle, nextHead)) {
-    return failGame(state, 'beetle', 'A hungry jungle beetle nipped you.')
+    return failGame(state, 'beetle', 'A hungry jungle beetle nipped the snake.')
   }
 
   const apple = state.remainingApples.find((item) => samePosition(item, nextHead))
@@ -94,13 +117,13 @@ export function moveGame(level: GameLevel, state: GameState, direction: Directio
   const occupiedBody = growing ? state.worm : state.worm.slice(0, -1)
 
   if (occupiedBody.some((segment) => samePosition(segment, nextHead))) {
-    return failGame(state, 'tail', 'You crossed your own trail.')
+    return failGame(state, 'tail', 'You crossed your own tail.')
   }
 
   const worm = [nextHead, ...state.worm.slice(0, growing ? state.worm.length : -1)]
   const movingBlockHit = level.obstacles.some((item) => {
     if (item.type !== 'moving' || !item.path?.length) return false
-    const position = item.path[nextTurn % item.path.length]
+    const position = getObstaclePositionAtTurn(item, nextTurn)
     return worm.some((segment) => samePosition(segment, position))
   })
   if (movingBlockHit) {
@@ -123,10 +146,15 @@ export function moveGame(level: GameLevel, state: GameState, direction: Directio
     }
   }
 
+  const gateJustUnlocked = !isGateUnlocked(level, state.collectedApples) && isGateUnlocked(level, collectedApples)
   const feedback = reachedPortal
-    ? `Collect ${Math.max(0, level.requiredApples - collectedApples)} more ${level.requiredApples - collectedApples === 1 ? 'apple' : 'apples'} before entering.`
+    ? `Collect ${Math.max(0, level.requiredApples - collectedApples)} more ${level.requiredApples - collectedApples === 1 ? 'apple' : 'apples'} to open the portal.`
     : apple
-      ? apple.type === 'golden' ? 'Golden apple collected. +50 points.' : 'Apple collected. Your trail grew.'
+      ? gateJustUnlocked
+        ? `${apple.type === 'golden' ? 'Golden apple! +50 pts.' : 'Apple eaten!'} Portal & gates are now open!`
+        : apple.type === 'golden'
+          ? 'Golden apple collected. +50 points!'
+          : 'Apple collected. The snake grew longer.'
       : ''
 
   return {
@@ -156,7 +184,7 @@ export function findHintDirection(level: GameLevel, state: GameState): Direction
   if (!targets.length) return null
 
   const blocked = new Set(level.obstacles
-    .filter((obstacle) => obstacle.type !== 'gate' || state.collectedApples < level.requiredApples - 1)
+    .filter((obstacle) => obstacle.type !== 'gate' || !isGateUnlocked(level, state.collectedApples))
     .flatMap((obstacle) => (obstacle.path ?? [obstacle]).map(({ x, y }) => `${x},${y}`)))
   const beetle = getForestBugPosition(level)
   if (beetle) blocked.add(`${beetle.x},${beetle.y}`)
