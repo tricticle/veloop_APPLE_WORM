@@ -1,5 +1,5 @@
-import { Apple, Bird, Bug, CircleDashed, LockKeyhole, Sparkles, Square, Triangle } from 'lucide-react'
-import type { TouchEventHandler } from 'react'
+import { Apple, Bird, Bug, CircleDashed, LockKeyhole, Sparkles, Triangle } from 'lucide-react'
+import type { ReactNode, TouchEventHandler } from 'react'
 import type { GameState } from '@/lib/game/engine'
 import type { GameLevel } from '@/lib/game/levels'
 
@@ -8,9 +8,10 @@ type GameBoardProps = {
   state: GameState
   onTouchStart?: TouchEventHandler<HTMLDivElement>
   onTouchEnd?: TouchEventHandler<HTMLDivElement>
+  resultOverlay?: ReactNode
 }
 
-export function GameBoard({ level, state, onTouchStart, onTouchEnd }: GameBoardProps) {
+export function GameBoard({ level, state, onTouchStart, onTouchEnd, resultOverlay }: GameBoardProps) {
   const wormPositions = new Map(state.worm.map((segment, index) => [`${segment.x},${segment.y}`, index]))
   const applePositions = new Map(level.apples.map((apple) => [`${apple.x},${apple.y}`, apple]))
   const obstaclePositions = new Map<string, GameLevel['obstacles'][number]>(level.obstacles.map((obstacle) => {
@@ -67,7 +68,7 @@ export function GameBoard({ level, state, onTouchStart, onTouchEnd }: GameBoardP
                 isHead ? 'worm head' : isWorm ? 'worm body' : '',
                 hasApple ? `${apple?.type ?? 'normal'} apple` : '',
                 isPortal ? 'exit portal' : '',
-                obstacle?.type === 'moving' ? 'flying bird hazard' : obstacle?.type ? `${obstacle.type} obstacle` : '',
+                obstacle?.type === 'moving' ? 'flying bird hazard' : obstacle?.type === 'wall' ? 'wooden maze wall' : obstacle?.type ? `${obstacle.type} obstacle` : '',
               ].filter(Boolean).join(', ')}
               className={`game-tile ${(x + y) % 2 === 0 ? 'tile-even' : 'tile-odd'} ${isWorm ? isHead ? 'tile-worm-head' : 'tile-worm-body' : ''} ${isPortal ? 'tile-portal' : ''} ${hasApple ? 'tile-apple' : ''} ${obstacle ? `tile-obstacle tile-${obstacle.type}` : ''}`}
             >
@@ -92,7 +93,7 @@ export function GameBoard({ level, state, onTouchStart, onTouchEnd }: GameBoardP
                   <span className="portal-core" />
                 </span>
               )}
-              {obstacle?.type === 'wall' && <Square className="obstacle-icon obstacle-wall-icon" aria-hidden="true" />}
+              {obstacle?.type === 'wall' && <span className="maze-wall-grain" aria-hidden="true" />}
               {obstacle?.type === 'spike' && <Triangle className="obstacle-icon obstacle-spike-icon" aria-hidden="true" />}
               {obstacle?.type === 'pit' && <span className="pit-token" aria-hidden="true" />}
               {obstacle?.type === 'gate' && <LockKeyhole className="obstacle-icon obstacle-gate-icon" aria-hidden="true" />}
@@ -124,6 +125,7 @@ export function GameBoard({ level, state, onTouchStart, onTouchEnd }: GameBoardP
           </svg>
         )}
       </div>
+      {resultOverlay}
     </div>
   )
 }

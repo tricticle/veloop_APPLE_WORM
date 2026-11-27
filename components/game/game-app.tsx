@@ -23,6 +23,8 @@ import {
   Trophy,
   UserRound,
   Medal,
+  Undo2,
+  RotateCcw,
 } from 'lucide-react'
 import { abandonGameAction, moveGameAction, startGameAction, undoGameAction, updatePlayerSettingsAction } from '@/app/actions/game'
 import { Button } from '@/components/ui/button'
@@ -449,9 +451,56 @@ export function GameApp({
                 </div>
 
                 {notice && <p className="game-notice" role="status">{notice}</p>}
-                {game.feedback && <p className={`game-feedback ${isFailed ? 'game-feedback-danger' : ''}`} role="status">{game.feedback}</p>}
+                {game.feedback && !isFinished && !isFailed && <p className="game-feedback" role="status">{game.feedback}</p>}
 
-                <GameBoard level={level} state={game} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} />
+                <GameBoard
+                  level={level}
+                  state={game}
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={handleTouchEnd}
+                  resultOverlay={(isFailed || isFinished && completion) && (
+                    <section
+                      className={`board-result-overlay ${isFailed ? 'board-result-failed' : 'board-result-complete'}`}
+                      role="region"
+                      aria-live="polite"
+                      aria-labelledby="board-result-title"
+                    >
+                      <span className="board-result-emblem"><Sparkles aria-hidden="true" /></span>
+                      {isFinished && completion && (
+                        <div className="result-stars" aria-label={`${completion.stars} out of 3 stars`}>
+                          {Array.from({ length: 3 }, (_, index) => <Star key={index} className={index < completion.stars ? 'star-earned' : ''} aria-hidden="true" />)}
+                        </div>
+                      )}
+                      <h3 id="board-result-title">{isFailed ? 'A thorny turn!' : 'Maze mastered!'}</h3>
+                      <p>{isFailed
+                        ? 'Every great explorer hits a wall. Undo a step or give this maze another try.'
+                        : level.id < unlockedThrough
+                          ? 'Brilliant trail-finding. Want to explore the next maze or take this one again?'
+                          : 'You reached the end of the trail. Replay this maze or choose another level.'}</p>
+                      {isFinished && completion && (
+                        <span className="board-result-reward">
+                          {completion.rewardCoins > 0 ? `+${completion.rewardCoins} acorns earned` : `${game.score.toLocaleString()} trail points`}
+                        </span>
+                      )}
+                      {!user && isFinished && <Link href="/sign-up" className="board-result-save-link">Save this run <ArrowUpRight aria-hidden="true" /></Link>}
+                      <div className="board-result-actions">
+                        {isFailed ? (
+                          <>
+                            {history.length > 0 && <Button size="sm" variant="outline" onClick={handleUndo}><Undo2 data-icon="inline-start" aria-hidden="true" /> Undo step</Button>}
+                            <Button size="sm" onClick={restartLevel}><RotateCcw data-icon="inline-start" aria-hidden="true" /> Try again</Button>
+                          </>
+                        ) : (
+                          <>
+                            {level.id < unlockedThrough
+                              ? <Button size="sm" onClick={() => selectLevel(level.id + 1)}>Next maze <ChevronRight data-icon="inline-end" aria-hidden="true" /></Button>
+                              : <Button size="sm" onClick={() => setActiveView('levels')}>Choose a maze <ChevronRight data-icon="inline-end" aria-hidden="true" /></Button>}
+                            <Button size="sm" variant="outline" onClick={restartLevel}><RotateCcw data-icon="inline-start" aria-hidden="true" /> Replay</Button>
+                          </>
+                        )}
+                      </div>
+                    </section>
+                  )}
+                />
 
                 <div className="board-progress-row">
                   <div className="apple-progress-track" aria-label={`${game.collectedApples} of ${level.requiredApples} required apples collected`}>
@@ -475,30 +524,6 @@ export function GameApp({
                   />
                 </div>
 
-                {isFailed && (
-                  <div className="result-banner result-banner-failed" role="status">
-                    <div><strong>This trail needs a rethink.</strong><span>Undo the last step, or start this level again.</span></div>
-                    <Button size="sm" variant="outline" onClick={restartLevel}>Restart level</Button>
-                  </div>
-                )}
-                {isFinished && completion && (
-                  <div className="result-banner result-banner-complete" role="status">
-                    <div className="result-stars" aria-label={`${completion.stars} out of 3 stars`}>
-                      {Array.from({ length: 3 }, (_, index) => <Star key={index} className={index < completion.stars ? 'star-earned' : ''} aria-hidden="true" />)}
-                    </div>
-                    <div className="result-copy">
-                      <strong>Trail complete. Lovely work.</strong>
-                      <span>{user
-                        ? completion.rewardCoins > 0 ? `First-clear reward: ${completion.rewardCoins} acorns added to your wallet.` : 'Your best score and stars are saved.'
-                        : 'This guest run stays in this tab. Sign in to save it and collect level rewards.'}</span>
-                    </div>
-                    <div className="result-actions">
-                      {!user && <Link href="/sign-up" className="result-link">Save your run <ArrowUpRight aria-hidden="true" /></Link>}
-                      {level.id < unlockedThrough && <Button size="sm" onClick={() => selectLevel(level.id + 1)}>Next level <ChevronRight data-icon="inline-end" aria-hidden="true" /></Button>}
-                      <Button size="sm" variant="outline" onClick={restartLevel}>Replay</Button>
-                    </div>
-                  </div>
-                )}
               </article>
             </section>
 
@@ -519,6 +544,7 @@ export function GameApp({
                 </ol>
                 <div className="trail-divider" />
                 <div className="tile-legend" aria-label="Game board legend">
+                  <span><i className="legend-wall"><span /></i> Maze wall</span>
                   <span><i className="legend-apple"><Apple aria-hidden="true" /></i> Apple</span>
                   <span><i className="legend-portal"><Sparkles aria-hidden="true" /></i> Portal</span>
                   <span><i className="legend-spike"><span /></i> Hazard</span>

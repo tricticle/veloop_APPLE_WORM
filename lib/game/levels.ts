@@ -117,55 +117,72 @@ function buildLevel(id: number): GameLevel {
   }))
   const pathKeySet = new Set(path.map(({ x, y }) => `${x},${y}`))
   const startKeySet = new Set(template.wormStart.map(({ x, y }) => `${x},${y}`))
-  const candidates: Coordinate[] = []
+  const mazeCellKeys = new Set([...pathKeySet, ...startKeySet])
+  const mazeBranches: Coordinate[][] = []
+  const branchCount = Math.min(2 + Math.floor((id - 1) / 12), 5)
+  const sideDirections: Coordinate[] = [
+    { x: 0, y: -1 },
+    { x: 1, y: 0 },
+    { x: 0, y: 1 },
+    { x: -1, y: 0 },
+  ]
 
+  for (let attempt = 0; attempt < path.length * 4 && mazeBranches.length < branchCount; attempt += 1) {
+    const pathIndex = 1 + ((id * 3 + attempt * 2) % (path.length - 2))
+    const root = path[pathIndex]
+    const directionOffset = (id + attempt) % sideDirections.length
+
+    for (let directionIndex = 0; directionIndex < sideDirections.length; directionIndex += 1) {
+      const direction = sideDirections[(directionOffset + directionIndex) % sideDirections.length]
+      const branch: Coordinate[] = []
+      let previous = root
+
+      for (let distance = 1; distance <= 2; distance += 1) {
+        const candidate = { x: previous.x + direction.x, y: previous.y + direction.y }
+        const candidateKey = `${candidate.x},${candidate.y}`
+        const touchingMaze = [
+          { x: candidate.x + 1, y: candidate.y },
+          { x: candidate.x - 1, y: candidate.y },
+          { x: candidate.x, y: candidate.y + 1 },
+          { x: candidate.x, y: candidate.y - 1 },
+        ].filter((point) => mazeCellKeys.has(`${point.x},${point.y}`))
+
+        if (candidate.x < 0 || candidate.x >= 7 || candidate.y < 0 || candidate.y >= 7 ||
+          mazeCellKeys.has(candidateKey) || touchingMaze.some((point) => point.x !== previous.x || point.y !== previous.y)) break
+
+        branch.push(candidate)
+        mazeCellKeys.add(candidateKey)
+        previous = candidate
+      }
+
+      if (branch.length) {
+        mazeBranches.push(branch)
+        break
+      }
+    }
+  }
+
+  const obstacles: GameObstacle[] = []
   for (let y = 0; y < 7; y += 1) {
     for (let x = 0; x < 7; x += 1) {
-      const key = `${x},${y}`
-      if (!pathKeySet.has(key) && !startKeySet.has(key)) candidates.push({ x, y })
+      if (!mazeCellKeys.has(`${x},${y}`)) obstacles.push({ x, y, type: 'wall' })
     }
   }
 
-  const obstacleCount = Math.min(2 + Math.floor((id - 1) / 5), 12)
-  const offset = (id * 7) % candidates.length
-  const usedCells = new Set(startKeySet)
-  const obstacles: GameObstacle[] = []
-  const orderedCandidates = Array.from(
-    { length: candidates.length },
-    (_, index) => candidates[(offset + index) % candidates.length],
-  )
-  const obstacleTypes: ObstacleType[] = ['wall', 'spike', 'pit', 'gate', 'moving']
+  const hazardTypes: ObstacleType[] = ['spike', 'pit', 'gate', 'moving']
+  mazeBranches.forEach((branch, branchIndex) => {
+    if ((id + branchIndex) % 3 !== 0) return
+    const hazardType = hazardTypes[(id + branchIndex) % hazardTypes.length]
+    const endpoint = branch[branch.length - 1]
 
-  for (const point of orderedCandidates) {
-    if (obstacles.length >= obstacleCount) break
-    const key = `${point.x},${point.y}`
-    if (usedCells.has(key)) continue
-
-    const type = obstacleTypes[(id + obstacles.length) % obstacleTypes.length]
-    usedCells.add(key)
-    if (type !== 'moving') {
-      obstacles.push({ ...point, type })
-      continue
+    if (hazardType === 'moving' && branch.length > 1) {
+      const movingPath = branch.slice(-2)
+      obstacles.push({ ...movingPath[0], type: 'moving', path: movingPath })
+      return
     }
 
-    const nextCell = [
-      { x: point.x + 1, y: point.y },
-      { x: point.x, y: point.y + 1 },
-      { x: point.x - 1, y: point.y },
-      { x: point.x, y: point.y - 1 },
-    ].find((candidate) => {
-      const candidateKey = `${candidate.x},${candidate.y}`
-      return candidate.x >= 0 && candidate.x < 7 && candidate.y >= 0 && candidate.y < 7 &&
-        !pathKeySet.has(candidateKey) && !usedCells.has(candidateKey)
-    })
-
-    if (nextCell) {
-      usedCells.add(`${nextCell.x},${nextCell.y}`)
-      obstacles.push({ ...point, type, path: [{ ...point }, nextCell] })
-    } else {
-      obstacles.push({ ...point, type: 'wall' })
-    }
-  }
+    obstacles.push({ ...endpoint, type: hazardType === 'moving' ? 'spike' : hazardType })
+  })
 
   const parMoves = path.length - 1
   const moveBonus = difficulty === 'BEGINNER' ? 9 : difficulty === 'EASY' ? 7 : difficulty === 'MEDIUM' ? 5 : difficulty === 'HARD' ? 3 : 2
