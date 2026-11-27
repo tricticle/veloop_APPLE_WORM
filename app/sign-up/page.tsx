@@ -13,8 +13,12 @@ export const metadata: Metadata = {
 }
 
 export default async function SignUpPage() {
-  const session = await auth.api.getSession({ headers: await headers() })
-  if (session?.user) redirect('/')
+  try {
+    const session = await auth.api.getSession({ headers: await headers() })
+    if (session?.user) redirect('/')
+  } catch {
+    // Ignore session lookup failure when DB is offline
+  }
 
   return (
     <main className="auth-page">

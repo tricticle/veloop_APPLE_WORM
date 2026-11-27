@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   env: {
     ...(process.env.VITE_GAME_NAME || process.env.GAME_NAME
       ? { VITE_GAME_NAME: process.env.VITE_GAME_NAME || process.env.GAME_NAME }
