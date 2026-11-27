@@ -143,10 +143,7 @@ export function GameBoard({ level, state, onTouchStart, onTouchEnd, resultOverla
                 className={`worm-body-segment ${isTail ? 'worm-tail-segment' : ''}`}
                 style={{ animationDelay: pulseDelay }}
               >
-                <circle className="worm-segment-outline" cx={x} cy={y} r="0.34" />
-                <circle className="worm-segment-bead" cx={x} cy={y} r="0.29" />
                 <path className="worm-segment-stripe" d={stripe} />
-                <circle className="worm-segment-glint" cx={x - 0.1} cy={y - 0.11} r="0.055" />
               </g>
             ))}
           </svg>
