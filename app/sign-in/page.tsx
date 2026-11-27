@@ -9,7 +9,7 @@ import { auth } from '@/lib/auth'
 import { GAME_NAME } from '@/src/config/gameConfig'
 
 export const metadata: Metadata = {
-  title: `Sign in | ${GAME_NAME}`,
+  title: 'Sign in',
   description: `Sign in to save your progress in ${GAME_NAME}.`,
 }
 

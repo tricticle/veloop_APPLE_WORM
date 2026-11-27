@@ -72,7 +72,7 @@ export function moveGame(level: GameLevel, state: GameState, direction: Directio
     const feedback = obstacle.type === 'gate'
       ? 'The gate needs one more apple.'
       : obstacle.type === 'moving'
-        ? 'A moving block is in the way.'
+        ? 'A forest bird swooped across that tile.'
         : 'A stone wall blocks that tile.'
     return { state: { ...state, feedback }, event: 'blocked' }
   }
@@ -102,7 +102,8 @@ export function moveGame(level: GameLevel, state: GameState, direction: Directio
     return worm.some((segment) => samePosition(segment, position))
   })
   if (movingBlockHit) {
-    return { state: { ...state, status: 'failed', feedback: 'A moving block closed around the trail.' }, event: 'failed' }
+      return { state: { ...state, status: 'failed', feedback: 'A forest bird swooped across your trail.' }, event: 'failed' }
+
   }
 
   const remainingApples = apple

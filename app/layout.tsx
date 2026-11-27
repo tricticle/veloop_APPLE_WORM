@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     default: GAME_NAME,
     template: `%s | ${GAME_NAME}`,
   },
-  description: `Guide a hungry little worm through a leafy world of apple-collecting puzzles in ${GAME_NAME}.`,
+  description: `Guide a bright green worm through a handcrafted jungle of wood-grain trails, apples, and swooping birds in ${GAME_NAME}.`,
   applicationName: GAME_NAME,
   generator: 'v0.app',
   icons: {
@@ -21,14 +21,14 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: GAME_NAME,
-    description: `A cozy puzzle adventure through the apple grove.`,
+    description: `A playful jungle puzzle adventure with carved wooden trails and lively forest hazards.`,
     type: 'website',
   },
 }
 
 export const viewport: Viewport = {
   colorScheme: 'light',
-  themeColor: '#f4f4ee',
+  themeColor: '#1f4a32',
   userScalable: true,
   maximumScale: 5,
 }

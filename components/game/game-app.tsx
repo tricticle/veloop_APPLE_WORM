@@ -15,6 +15,7 @@ import {
   Leaf,
   LogOut,
   Map,
+  Bird,
   ShieldCheck,
   Sparkles,
   SlidersHorizontal,
@@ -22,6 +23,8 @@ import {
   Trophy,
   UserRound,
   Medal,
+  Undo2,
+  RotateCcw,
 } from 'lucide-react'
 import { abandonGameAction, moveGameAction, startGameAction, undoGameAction, updatePlayerSettingsAction } from '@/app/actions/game'
 import { Button } from '@/components/ui/button'
@@ -360,8 +363,8 @@ export function GameApp({
 
   const firstName = user?.name.trim().split(/\s+/)[0]
   const displayViewHeading: Record<View, string> = {
-    adventure: firstName ? `Welcome back, ${firstName}.` : 'A fresh trail is waiting.',
-    levels: 'Choose your next little puzzle.',
+    adventure: firstName ? `Welcome back, ${firstName}.` : 'The forest is calling.',
+    levels: 'Choose your next trail.',
     rewards: 'Good runs grow good things.',
     achievements: 'Every good trail leaves a mark.',
     leaderboard: 'The grove’s most thoughtful trails.',
@@ -382,10 +385,11 @@ export function GameApp({
               variant="ghost"
               size="sm"
               className={`nav-button ${activeView === key ? 'nav-button-active' : ''}`}
+              aria-label={label}
               aria-current={activeView === key ? 'page' : undefined}
               onClick={() => setActiveView(key)}
             >
-              <Icon data-icon="inline-start" aria-hidden="true" /> {label}
+              <Icon data-icon="inline-start" aria-hidden="true" /> <span>{label}</span>
             </Button>
           ))}
         </nav>
@@ -401,7 +405,7 @@ export function GameApp({
               <Button variant="ghost" size="icon" className="signout-button" aria-label="Sign out" disabled={signOutPending} onClick={handleSignOut}><LogOut aria-hidden="true" /></Button>
             </>
           ) : (
-            <Link href="/sign-up" className="create-account-link"><UserRound aria-hidden="true" /><span>Save progress</span><ArrowUpRight aria-hidden="true" /></Link>
+            <Link href="/sign-up" className="create-account-link" aria-label="Create an account to save progress"><UserRound aria-hidden="true" /><span>Save progress</span><ArrowUpRight aria-hidden="true" /></Link>
           )}
         </div>
       </header>
@@ -409,9 +413,10 @@ export function GameApp({
       <main className="page-content">
         <section className="page-intro" aria-labelledby="page-title">
           <div>
-            <p className="eyebrow"><span className="eyebrow-dot" /> A cozy puzzle adventure</p>
+            <p className="eyebrow"><span className="eyebrow-dot" /> A jungle trail adventure</p>
             <h1 id="page-title">{displayViewHeading[activeView]}</h1>
-            <p className="page-subtitle">Guide your little friend through the grove, collect the apples, and find the way out.</p>
+              <p className="page-subtitle">Guide your jungle friend along the wooden trail, gather apples, and dodge the birds guarding the moonlit portal.</p>
+
           </div>
           <div className="journey-progress">
             <span className="journey-icon"><Leaf aria-hidden="true" /></span>
@@ -446,9 +451,56 @@ export function GameApp({
                 </div>
 
                 {notice && <p className="game-notice" role="status">{notice}</p>}
-                {game.feedback && <p className={`game-feedback ${isFailed ? 'game-feedback-danger' : ''}`} role="status">{game.feedback}</p>}
+                {game.feedback && !isFinished && !isFailed && <p className="game-feedback" role="status">{game.feedback}</p>}
 
-                <GameBoard level={level} state={game} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} />
+                <GameBoard
+                  level={level}
+                  state={game}
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={handleTouchEnd}
+                  resultOverlay={(isFailed || isFinished && completion) && (
+                    <section
+                      className={`board-result-overlay ${isFailed ? 'board-result-failed' : 'board-result-complete'}`}
+                      role="region"
+                      aria-live="polite"
+                      aria-labelledby="board-result-title"
+                    >
+                      <span className="board-result-emblem"><Sparkles aria-hidden="true" /></span>
+                      {isFinished && completion && (
+                        <div className="result-stars" aria-label={`${completion.stars} out of 3 stars`}>
+                          {Array.from({ length: 3 }, (_, index) => <Star key={index} className={index < completion.stars ? 'star-earned' : ''} aria-hidden="true" />)}
+                        </div>
+                      )}
+                      <h3 id="board-result-title">{isFailed ? 'A thorny turn!' : 'Maze mastered!'}</h3>
+                      <p>{isFailed
+                        ? 'Every great explorer hits a wall. Undo a step or give this maze another try.'
+                        : level.id < unlockedThrough
+                          ? 'Brilliant trail-finding. Want to explore the next maze or take this one again?'
+                          : 'You reached the end of the trail. Replay this maze or choose another level.'}</p>
+                      {isFinished && completion && (
+                        <span className="board-result-reward">
+                          {completion.rewardCoins > 0 ? `+${completion.rewardCoins} acorns earned` : `${game.score.toLocaleString()} trail points`}
+                        </span>
+                      )}
+                      {!user && isFinished && <Link href="/sign-up" className="board-result-save-link">Save this run <ArrowUpRight aria-hidden="true" /></Link>}
+                      <div className="board-result-actions">
+                        {isFailed ? (
+                          <>
+                            {history.length > 0 && <Button size="sm" variant="outline" onClick={handleUndo}><Undo2 data-icon="inline-start" aria-hidden="true" /> Undo step</Button>}
+                            <Button size="sm" onClick={restartLevel}><RotateCcw data-icon="inline-start" aria-hidden="true" /> Try again</Button>
+                          </>
+                        ) : (
+                          <>
+                            {level.id < unlockedThrough
+                              ? <Button size="sm" onClick={() => selectLevel(level.id + 1)}>Next maze <ChevronRight data-icon="inline-end" aria-hidden="true" /></Button>
+                              : <Button size="sm" onClick={() => setActiveView('levels')}>Choose a maze <ChevronRight data-icon="inline-end" aria-hidden="true" /></Button>}
+                            <Button size="sm" variant="outline" onClick={restartLevel}><RotateCcw data-icon="inline-start" aria-hidden="true" /> Replay</Button>
+                          </>
+                        )}
+                      </div>
+                    </section>
+                  )}
+                />
 
                 <div className="board-progress-row">
                   <div className="apple-progress-track" aria-label={`${game.collectedApples} of ${level.requiredApples} required apples collected`}>
@@ -472,30 +524,6 @@ export function GameApp({
                   />
                 </div>
 
-                {isFailed && (
-                  <div className="result-banner result-banner-failed" role="status">
-                    <div><strong>This trail needs a rethink.</strong><span>Undo the last step, or start this level again.</span></div>
-                    <Button size="sm" variant="outline" onClick={restartLevel}>Restart level</Button>
-                  </div>
-                )}
-                {isFinished && completion && (
-                  <div className="result-banner result-banner-complete" role="status">
-                    <div className="result-stars" aria-label={`${completion.stars} out of 3 stars`}>
-                      {Array.from({ length: 3 }, (_, index) => <Star key={index} className={index < completion.stars ? 'star-earned' : ''} aria-hidden="true" />)}
-                    </div>
-                    <div className="result-copy">
-                      <strong>Trail complete. Lovely work.</strong>
-                      <span>{user
-                        ? completion.rewardCoins > 0 ? `First-clear reward: ${completion.rewardCoins} acorns added to your wallet.` : 'Your best score and stars are saved.'
-                        : 'This guest run stays in this tab. Sign in to save it and collect level rewards.'}</span>
-                    </div>
-                    <div className="result-actions">
-                      {!user && <Link href="/sign-up" className="result-link">Save your run <ArrowUpRight aria-hidden="true" /></Link>}
-                      {level.id < unlockedThrough && <Button size="sm" onClick={() => selectLevel(level.id + 1)}>Next level <ChevronRight data-icon="inline-end" aria-hidden="true" /></Button>}
-                      <Button size="sm" variant="outline" onClick={restartLevel}>Replay</Button>
-                    </div>
-                  </div>
-                )}
               </article>
             </section>
 
@@ -511,15 +539,16 @@ export function GameApp({
                   </li>
                   <li className={game.collectedApples >= level.requiredApples ? 'trail-step-active' : ''}>
                     <span className="step-marker">2</span>
-                    <span><strong>Reach the portal</strong><small>Follow the violet glow</small></span>
+                    <span><strong>Reach the portal</strong><small>Follow the moonlit trail</small></span>
                   </li>
                 </ol>
                 <div className="trail-divider" />
                 <div className="tile-legend" aria-label="Game board legend">
+                  <span><i className="legend-wall"><span /></i> Maze wall</span>
                   <span><i className="legend-apple"><Apple aria-hidden="true" /></i> Apple</span>
                   <span><i className="legend-portal"><Sparkles aria-hidden="true" /></i> Portal</span>
                   <span><i className="legend-spike"><span /></i> Hazard</span>
-                  <span><i className="legend-moving"><span /></i> Moving block</span>
+                  <span><i className="legend-moving"><Bird aria-hidden="true" /></i> Flying bird</span>
                 </div>
               </section>
 
