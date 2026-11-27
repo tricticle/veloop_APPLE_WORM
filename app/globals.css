@@ -4597,3 +4597,902 @@ body {
     transition: none;
   }
 }
+
+/* ============================================================
+   Dual-Path, Bird Companion, Redesigned Worm & 7 Mechanics
+   ============================================================ */
+
+.level-challenge-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 4px 0 0;
+  color: #6b674f;
+  font-size: 11px;
+  font-weight: 550;
+  line-height: 1.35;
+}
+
+.level-challenge-line svg {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  color: #b47d2a;
+}
+
+.objective-bonus-metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border: 1px solid #ead49b;
+  border-radius: 999px;
+  background: #fff6dc;
+  color: #825e1b;
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.objective-bonus-metric svg {
+  width: 11px;
+  height: 11px;
+  color: #c28a24;
+}
+
+.level-tutorial-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: fit-content;
+  max-width: calc(100% - 32px);
+  margin: 12px auto 0;
+  padding: 7px 12px;
+  border: 1px solid #d5e2c3;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f3f9ea, #edf5df);
+  color: #355d37;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.level-tutorial-banner svg {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  color: #6f943f;
+}
+
+/* --- Bird Companion Card --- */
+.bird-companion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  border: 1px solid #dfd0ae;
+  border-radius: 17px;
+  background: linear-gradient(145deg, rgba(255, 251, 241, 0.96), rgba(249, 239, 214, 0.94));
+  box-shadow: 0 8px 20px rgba(75, 57, 30, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.bird-companion-happy {
+  border-color: #c6daa8;
+  background: linear-gradient(145deg, #f9fcf2, #eef5df);
+}
+
+.bird-companion-cheer {
+  border-color: #e3c474;
+  background: linear-gradient(145deg, #fffaf0, #fcf0cd);
+}
+
+.bird-companion-worry {
+  border-color: #e4bfa8;
+  background: linear-gradient(145deg, #fff8f3, #fbe9de);
+}
+
+.bird-companion-avatar {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid #e7d8b5;
+  border-radius: 15px;
+  background: radial-gradient(circle at 35% 30%, #fffdf6, #f4e6c4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 3px 8px rgba(84, 62, 29, 0.08);
+}
+
+.bird-companion-svg {
+  width: 50px;
+  height: 50px;
+  overflow: visible;
+}
+
+.bird-head-tilt {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: companion-idle-bob 3.4s ease-in-out infinite;
+}
+
+.bird-companion-cheer .bird-head-tilt {
+  animation: companion-cheer-hop 0.9s ease-in-out infinite;
+}
+
+.bird-companion-happy .bird-head-tilt {
+  animation: companion-happy-nod 1.4s ease-in-out infinite;
+}
+
+.bird-companion-worry .bird-head-tilt {
+  transform: rotate(-6deg);
+  animation: companion-worry-shiver 2.2s ease-in-out infinite;
+}
+
+.bird-wing-flutter {
+  transform-box: fill-box;
+  transform-origin: 20% 35%;
+  animation: companion-wing 3.4s ease-in-out infinite;
+}
+
+.bird-companion-cheer .bird-wing-flutter,
+.bird-companion-happy .bird-wing-flutter {
+  animation: companion-wing-fast 0.65s ease-in-out infinite;
+}
+
+.bird-eye-blink {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: worm-blink 4.6s ease-in-out infinite;
+}
+
+.bird-companion-bubble {
+  min-width: 0;
+  flex: 1;
+}
+
+.bird-companion-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 3px;
+  color: #9b772e;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.bird-companion-kicker svg {
+  width: 11px;
+  height: 11px;
+}
+
+.bird-companion-bubble p {
+  margin: 0;
+  color: #3d523c;
+  font-size: 11.5px;
+  font-weight: 550;
+  line-height: 1.45;
+}
+
+/* --- Worm Tail Wiggle, Squash/Stretch & Blink --- */
+.worm-tail-wiggle {
+  transform-origin: 0px 0px;
+  animation: tail-wiggle 2.2s ease-in-out infinite;
+}
+
+.worm-head-move-squash {
+  animation: head-squash 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.worm-head-ate-pop {
+  animation: head-ate-pop 280ms cubic-bezier(0.2, 1.35, 0.4, 1) both;
+}
+
+.worm-eye-blink {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: worm-blink 4.2s ease-in-out infinite;
+}
+
+/* --- Board Micro-animations, Floating Score & Particles --- */
+.board-rewind {
+  animation: board-rewind-flash 260ms ease-out;
+}
+
+.board-reset-pulse {
+  animation: board-reset-flash 260ms ease-out;
+}
+
+.board-step-preview {
+  position: absolute;
+  z-index: 4;
+  display: grid;
+  width: 44%;
+  height: 44%;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 252, 238, 0.85);
+  color: #336339;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 130ms ease, transform 130ms ease;
+  pointer-events: none;
+}
+
+.board-step-preview svg {
+  width: 68%;
+  height: 68%;
+  stroke-width: 2.6;
+}
+
+.tile-clickable-step:hover .board-step-preview {
+  opacity: 0.95;
+  transform: scale(1);
+}
+
+.board-score-popup {
+  position: absolute;
+  z-index: 7;
+  padding: 2px 7px;
+  border: 1px solid #f5da8d;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fff9e2, #f5d87e);
+  color: #6b4b12;
+  font-size: 11px;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  box-shadow: 0 3px 10px rgba(72, 48, 12, 0.28);
+  transform: translate(-50%, -60%);
+  pointer-events: none;
+  animation: score-float-up 820ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.grove-ambient-particles {
+  position: absolute;
+  z-index: 6;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.grove-leaf-mote,
+.grove-firefly {
+  position: absolute;
+  display: block;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.grove-leaf-mote {
+  width: 8px;
+  height: 5px;
+  border-radius: 70% 10% 70% 10%;
+  background: rgba(182, 214, 114, 0.72);
+  animation: mote-drift 9s ease-in-out infinite;
+}
+
+.grove-firefly {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ffe896;
+  box-shadow: 0 0 8px rgba(255, 232, 150, 0.85);
+  animation: firefly-bob 6.5s ease-in-out infinite;
+}
+
+.mote-1 { top: 8%; left: 10%; animation-delay: 0s; }
+.mote-2 { top: 18%; right: 12%; animation-delay: -3.2s; }
+.mote-3 { bottom: 16%; left: 16%; animation-delay: -6.1s; }
+.mote-4 { top: 28%; left: 78%; animation-delay: -1.5s; }
+.mote-5 { bottom: 22%; right: 18%; animation-delay: -4.2s; }
+
+.board-confetti-burst {
+  position: absolute;
+  z-index: 7;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  width: 7px;
+  height: 11px;
+  border-radius: 2px;
+  animation: confetti-pop 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.confetti-0 { background: #9ae866; --cx: -135px; --cy: -110px; --cr: -180deg; }
+.confetti-1 { background: #f2c652; --cx: 125px; --cy: -98px; --cr: 195deg; }
+.confetti-2 { background: #e86250; --cx: -95px; --cy: 90px; --cr: -120deg; }
+.confetti-3 { background: #6cc9e8; --cx: 110px; --cy: 85px; --cr: 145deg; }
+
+.confetti-piece:nth-child(2n) { animation-delay: 40ms; }
+.confetti-piece:nth-child(3n) {
+  --cx: 35px;
+  --cy: -140px;
+  animation-delay: 80ms;
+}
+.confetti-piece:nth-child(5n) {
+  --cx: -45px;
+  --cy: -130px;
+  animation-delay: 110ms;
+}
+.confetti-piece:nth-child(7n) {
+  --cx: 145px;
+  --cy: 20px;
+  animation-delay: 60ms;
+}
+.confetti-piece:nth-child(11n) {
+  --cx: -145px;
+  --cy: 15px;
+  animation-delay: 95ms;
+}
+
+/* --- Ghost Path Reveal & Animated Star Reveal --- */
+.ghost-player-trail {
+  fill: none;
+  stroke: rgba(204, 128, 45, 0.85);
+  stroke-width: 0.14;
+  stroke-dasharray: 0.15 0.13;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ghost-optimal-trail {
+  fill: none;
+  stroke: #58cf5c;
+  stroke-width: 0.19;
+  stroke-dasharray: 0.25 0.13;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 0.08px rgba(88, 207, 92, 0.8));
+  animation: ghost-trail-flow 1.4s linear infinite;
+}
+
+.star-pop-reveal {
+  animation: star-pop 380ms cubic-bezier(0.2, 1.45, 0.4, 1) both;
+}
+
+.board-result-overlay {
+  z-index: 8;
+}
+
+.board-result-overlay.board-result-compact {
+  inset: auto 10px 10px 10px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 10px 12px;
+  background: linear-gradient(145deg, rgba(255, 251, 241, 0.92), rgba(246, 235, 207, 0.9));
+  text-align: left;
+  backdrop-filter: blur(4px);
+}
+
+.board-result-overlay.board-result-compact h3 {
+  font-size: 16px;
+}
+
+.board-result-overlay.board-result-compact .board-result-actions {
+  width: auto;
+  flex: 0 1 auto;
+  justify-content: flex-end;
+  margin-top: 0;
+}
+
+.board-result-overlay.board-result-compact .board-result-actions > button {
+  min-width: auto;
+  flex: 0 0 auto;
+  padding-inline: 10px;
+}
+
+/* --- 7 Deterministic Mechanics Tiles --- */
+.tile-ice {
+  background: linear-gradient(145deg, rgba(212, 243, 252, 0.85), rgba(164, 222, 244, 0.82)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -2px 0 rgba(76, 152, 184, 0.3);
+}
+
+.ice-tile-surface {
+  position: relative;
+  display: grid;
+  width: 78%;
+  height: 78%;
+  place-items: center;
+  border: 1.5px solid rgba(132, 205, 232, 0.8);
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(196, 237, 250, 0.6));
+}
+
+.ice-flake-icon {
+  width: 62%;
+  height: 62%;
+  color: #2f89ad;
+  opacity: 0.85;
+}
+
+.tile-fragile {
+  background-color: rgba(74, 48, 24, 0.65) !important;
+}
+
+.fragile-plank {
+  position: relative;
+  display: block;
+  width: 82%;
+  height: 76%;
+  border: 1.5px solid #966a3c;
+  border-radius: 7px;
+  background:
+    repeating-linear-gradient(90deg, rgba(84, 52, 24, 0.25) 0 1px, transparent 1px 8px),
+    linear-gradient(180deg, #deb77f, #bd8f55);
+  box-shadow: inset 0 1px 0 rgba(255, 240, 207, 0.6), 0 2px 0 #664222;
+}
+
+.fragile-cracked {
+  border-color: #c86f33;
+  background:
+    linear-gradient(35deg, transparent 46%, #4a2b14 47%, #4a2b14 52%, transparent 53%),
+    linear-gradient(-38deg, transparent 46%, #4a2b14 47%, #4a2b14 51%, transparent 52%),
+    linear-gradient(180deg, #d69f61, #ac6f36);
+  animation: plank-creak 0.35s ease-in-out 2;
+}
+
+.tile-fragile-collapsed {
+  background-color: rgba(24, 15, 9, 0.88) !important;
+}
+
+.fragile-collapsed {
+  width: 72%;
+  height: 72%;
+  border: 2px dashed #7e6145;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0e1312 0 55%, #302419 95%);
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.8);
+}
+
+.tile-teleport {
+  background-color: rgba(76, 62, 128, 0.25) !important;
+}
+
+.teleport-pad {
+  position: relative;
+  display: grid;
+  width: 78%;
+  height: 78%;
+  place-items: center;
+  border-radius: 50%;
+  font-weight: 850;
+}
+
+.teleport-pad-a {
+  border: 2px solid #80e1f5;
+  background: radial-gradient(circle, #4f58a8, #282a61);
+  color: #dcf9ff;
+  box-shadow: 0 0 10px rgba(108, 214, 245, 0.55);
+}
+
+.teleport-pad-b {
+  border: 2px solid #f7cf6c;
+  background: radial-gradient(circle, #388875, #1b4f47);
+  color: #fff6cf;
+  box-shadow: 0 0 10px rgba(247, 207, 108, 0.52);
+}
+
+.teleport-ring {
+  position: absolute;
+  width: 82%;
+  height: 82%;
+  opacity: 0.72;
+  animation: portal-spin 7s linear infinite;
+}
+
+.teleport-label {
+  position: relative;
+  z-index: 1;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.tile-key {
+  background-color: rgba(245, 206, 120, 0.2) !important;
+}
+
+.tile-key-collected {
+  background-color: rgba(208, 224, 165, 0.16) !important;
+}
+
+.key-token {
+  display: grid;
+  width: 70%;
+  height: 70%;
+  place-items: center;
+  border-radius: 10px;
+  animation: apple-bob 2.5s ease-in-out infinite;
+}
+
+.key-token svg {
+  width: 66%;
+  height: 66%;
+}
+
+.key-amber {
+  border: 1.5px solid #a8711c;
+  background: radial-gradient(circle at 30% 25%, #ffe696, #dda02e);
+  color: #523309;
+  box-shadow: 0 2px 6px rgba(130, 86, 17, 0.35);
+}
+
+.key-emerald {
+  border: 1.5px solid #246b45;
+  background: radial-gradient(circle at 30% 25%, #9ef2bc, #369d62);
+  color: #0e3d23;
+  box-shadow: 0 2px 6px rgba(22, 92, 53, 0.35);
+}
+
+.key-cobalt {
+  border: 1.5px solid #2d5596;
+  background: radial-gradient(circle at 30% 25%, #b2d3ff, #4479cc);
+  color: #102a54;
+  box-shadow: 0 2px 6px rgba(27, 63, 122, 0.35);
+}
+
+.gate-locked-amber {
+  border-color: rgba(235, 184, 78, 0.75);
+  background: linear-gradient(145deg, rgba(112, 74, 24, 0.9), rgba(68, 43, 14, 0.94));
+}
+
+.gate-locked-amber .obstacle-gate-icon {
+  color: #ffd773;
+}
+
+.gate-locked-emerald {
+  border-color: rgba(98, 206, 142, 0.72);
+  background: linear-gradient(145deg, rgba(30, 82, 52, 0.9), rgba(18, 52, 34, 0.94));
+}
+
+.gate-locked-emerald .obstacle-gate-icon {
+  color: #9df2bf;
+}
+
+.gate-locked-cobalt {
+  border-color: rgba(112, 168, 245, 0.72);
+  background: linear-gradient(145deg, rgba(35, 62, 108, 0.9), rgba(20, 39, 72, 0.94));
+}
+
+.gate-locked-cobalt .obstacle-gate-icon {
+  color: #b8d6ff;
+}
+
+.tile-spike-dormant {
+  background-color: rgba(95, 118, 72, 0.22) !important;
+}
+
+.spike-retracted {
+  opacity: 0.45;
+  transform: scale(0.62);
+}
+
+.spike-pulse-dot {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 6px;
+  height: 6px;
+  border: 1px solid #fff4dc;
+  border-radius: 50%;
+  background: #e5834b;
+}
+
+.spike-retracted .spike-pulse-dot {
+  background: #77b368;
+}
+
+.caged-bird-token {
+  position: relative;
+  display: grid;
+  width: 78%;
+  height: 78%;
+  place-items: center;
+  border: 1.5px solid #c69a49;
+  border-radius: 10px;
+  background: radial-gradient(circle at 40% 35%, #fff3cf, #dfbe78);
+  color: #6b4319;
+  box-shadow: 0 2px 5px rgba(59, 41, 14, 0.35);
+}
+
+.caged-bird-icon {
+  width: 62%;
+  height: 62%;
+  fill: rgba(235, 148, 56, 0.35);
+  color: #6d4117;
+}
+
+.bird-cage-bars {
+  position: absolute;
+  inset: 2px 4px;
+  border-right: 2px solid rgba(92, 60, 27, 0.65);
+  border-left: 2px solid rgba(92, 60, 27, 0.65);
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 5px,
+    rgba(92, 60, 27, 0.55) 5px 7px
+  );
+  pointer-events: none;
+}
+
+.tile-bird-freed {
+  background-color: rgba(138, 198, 108, 0.22) !important;
+}
+
+.caged-bird-freed {
+  border-color: rgba(84, 152, 74, 0.55);
+  background: rgba(214, 240, 194, 0.65);
+  opacity: 0.72;
+}
+
+.caged-bird-freed .caged-bird-icon {
+  color: #366d3c;
+  fill: rgba(124, 196, 102, 0.3);
+}
+
+/* --- Sidebar Legend Extras --- */
+.legend-golden {
+  background: #fff3cc;
+  color: #c2881d;
+}
+
+.legend-key {
+  background: #fcebc4;
+  color: #9e6a19;
+}
+
+.legend-ice {
+  background: #e3f5fc;
+  color: #2f86ab;
+}
+
+.legend-fragile {
+  border: 1px solid #a87b47;
+  background: linear-gradient(180deg, #deb77f, #bd8f55);
+}
+
+.legend-fragile span {
+  width: 10px;
+  border-top: 1px solid #6b421f;
+}
+
+.legend-bird-rescue {
+  background: #fcefd2;
+  color: #965d20;
+}
+
+/* --- Level Select Additions --- */
+.levels-summary-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.levels-stars-summary {
+  border-color: #e4cc8a;
+  background: #fff7dc;
+  color: #82601c;
+}
+
+.levels-stars-summary svg {
+  width: 14px;
+  height: 14px;
+  fill: #e3b349;
+  color: #b48224;
+}
+
+.world-stars-tally {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid #e3cf9b;
+  border-radius: 999px;
+  background: rgba(255, 249, 230, 0.9);
+  color: #8a6621;
+  font-size: 10px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.world-stars-tally svg {
+  width: 11px;
+  height: 11px;
+  fill: #e3b349;
+  color: #b48224;
+}
+
+.level-mastered {
+  border-color: #c29636 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 212, 0.8),
+    0 3px 0 #997122,
+    0 6px 12px rgba(114, 83, 21, 0.2) !important;
+}
+
+.level-three-star-nudge {
+  position: absolute;
+  z-index: 2;
+  top: 4px;
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 5px;
+  border: 1px solid #e8ca7e;
+  border-radius: 999px;
+  background: rgba(255, 248, 222, 0.96);
+  color: #885d12;
+  font-size: 7px;
+  font-weight: 800;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.level-three-star-nudge svg {
+  width: 8px;
+  height: 8px;
+  color: #cb9324;
+}
+
+.level-star-filled {
+  color: #cf9627;
+  fill: currentColor;
+}
+
+.level-star-empty {
+  color: #cfc6ad;
+  fill: rgba(207, 198, 173, 0.35);
+}
+
+/* --- Keyframes --- */
+@keyframes companion-idle-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-1.6px) rotate(1.5deg); }
+}
+
+@keyframes companion-cheer-hop {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  40% { transform: translateY(-4px) rotate(-4deg); }
+  70% { transform: translateY(-1px) rotate(3deg); }
+}
+
+@keyframes companion-happy-nod {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(4deg) translateY(-1.5px); }
+}
+
+@keyframes companion-worry-shiver {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(-8deg) translateX(-0.8px); }
+}
+
+@keyframes companion-wing {
+  0%, 76%, 100% { transform: rotate(0deg); }
+  84% { transform: rotate(-14deg); }
+  92% { transform: rotate(-4deg); }
+}
+
+@keyframes companion-wing-fast {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-20deg); }
+}
+
+@keyframes tail-wiggle {
+  0%, 100% { transform: rotate(-7deg); }
+  50% { transform: rotate(7deg); }
+}
+
+@keyframes head-squash {
+  0% { transform: scale(1.1, 0.9); }
+  100% { transform: scale(1, 1); }
+}
+
+@keyframes head-ate-pop {
+  0% { transform: scale(0.86); }
+  55% { transform: scale(1.16); }
+  100% { transform: scale(1); }
+}
+
+@keyframes board-rewind-flash {
+  0% { box-shadow: inset 0 0 0 3px rgba(102, 165, 204, 0.65), 0 5px 0 #593a22, 0 14px 26px rgba(44, 35, 22, 0.22); }
+  100% { box-shadow: inset 0 0 0 2px rgba(255, 220, 151, 0.4), 0 5px 0 #593a22, 0 14px 26px rgba(44, 35, 22, 0.22); }
+}
+
+@keyframes board-reset-flash {
+  0% { transform: scale(0.985); }
+  100% { transform: scale(1); }
+}
+
+@keyframes score-float-up {
+  0% { opacity: 0; transform: translate(-50%, -30%) scale(0.82); }
+  20% { opacity: 1; transform: translate(-50%, -65%) scale(1.06); }
+  100% { opacity: 0; transform: translate(-50%, -145%) scale(0.95); }
+}
+
+@keyframes mote-drift {
+  0%, 100% { opacity: 0.2; transform: translate(0, 0) rotate(0deg); }
+  50% { opacity: 0.55; transform: translate(10px, 14px) rotate(35deg); }
+}
+
+@keyframes firefly-bob {
+  0%, 100% { opacity: 0.15; transform: translate(0, 0) scale(0.85); }
+  50% { opacity: 0.65; transform: translate(-8px, -10px) scale(1.15); }
+}
+
+@keyframes confetti-pop {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(0.8); }
+  100% { opacity: 0; transform: translate(var(--cx), var(--cy)) rotate(var(--cr)) scale(1.1); }
+}
+
+@keyframes ghost-trail-flow {
+  to { stroke-dashoffset: -0.76; }
+}
+
+@keyframes star-pop {
+  0% { opacity: 0.25; transform: scale(0.4) rotate(-22deg); }
+  65% { opacity: 1; transform: scale(1.24) rotate(6deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes plank-creak {
+  0%, 100% { transform: rotate(0deg); }
+  33% { transform: rotate(-2deg); }
+  66% { transform: rotate(2deg); }
+}
+
+@media (max-width: 640px) {
+  .level-three-star-nudge {
+    display: none;
+  }
+
+  .board-result-overlay.board-result-compact {
+    inset: auto 8px 8px 8px;
+    padding: 8px 10px;
+  }
+
+  .board-result-overlay.board-result-compact h3 {
+    font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bird-head-tilt,
+  .bird-wing-flutter,
+  .bird-eye-blink,
+  .worm-tail-wiggle,
+  .worm-head-move-squash,
+  .worm-head-ate-pop,
+  .worm-eye-blink,
+  .board-rewind,
+  .board-reset-pulse,
+  .board-score-popup,
+  .grove-leaf-mote,
+  .grove-firefly,
+  .confetti-piece,
+  .ghost-optimal-trail,
+  .star-pop-reveal,
+  .teleport-ring,
+  .key-token,
+  .fragile-cracked {
+    animation: none !important;
+    transition: none !important;
+  }
+}

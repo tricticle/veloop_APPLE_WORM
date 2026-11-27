@@ -88,5 +88,31 @@ if (!process.env.DATABASE_URL) {
   }
 }
 
+let extendedSchemaPromise: Promise<void> | null = null
+
+export async function ensureExtendedSchema(): Promise<void> {
+  if (!isDatabaseConfigured) return
+  if (!extendedSchemaPromise) {
+    extendedSchemaPromise = (async () => {
+      try {
+        await pool.query(`
+          ALTER TABLE "game_profiles"
+            ADD COLUMN IF NOT EXISTS "noUndoClears" integer NOT NULL DEFAULT 0,
+            ADD COLUMN IF NOT EXISTS "birdsRescued" integer NOT NULL DEFAULT 0;
+          ALTER TABLE "level_progress"
+            ADD COLUMN IF NOT EXISTS "bestRouteType" text DEFAULT 'STANDARD',
+            ADD COLUMN IF NOT EXISTS "noUndoClear" boolean NOT NULL DEFAULT false;
+          ALTER TABLE "game_sessions"
+            ADD COLUMN IF NOT EXISTS "usedUndo" boolean NOT NULL DEFAULT false,
+            ADD COLUMN IF NOT EXISTS "starsEarned" integer;
+        `)
+      } catch {
+        // Ignore if database is offline or read-only; downstream try/catch handles gracefully.
+      }
+    })()
+  }
+  await extendedSchemaPromise
+}
+
 export { pool, db }
 

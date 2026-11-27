@@ -4,7 +4,7 @@ import { GameApp } from '@/components/game/game-app'
 import type { RewardHistoryItem } from '@/components/game/rewards-view'
 import type { LeaderboardEntry } from '@/components/game/leaderboard-view'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { db, ensureExtendedSchema } from '@/lib/db'
 import { economyConfigs, gameProfiles, gameSessions, levelProgress, rewardTransactions, walletTransactions, user as authUser } from '@/lib/db/schema'
 import { DEFAULT_ECONOMY_CONFIG, readEconomyConfig } from '@/lib/game/economy-config'
 import type { GameState } from '@/lib/game/engine'
@@ -20,7 +20,7 @@ export default async function HomePage() {
   }
   let initialProfile = null
   let initialCompletedLevels: Record<number, number> = {}
-  let initialLevelStats: Record<number, { score: number; bestMoves: number | null }> = {}
+  let initialLevelStats: Record<number, { score: number; bestMoves: number | null; noUndoClear?: boolean }> = {}
   let initialRewardHistory: RewardHistoryItem[] = []
   let initialActiveGame: {
     sessionId: string
@@ -31,6 +31,7 @@ export default async function HomePage() {
 
   if (session?.user) {
     try {
+      await ensureExtendedSchema()
       const userId = session.user.id
       await db.insert(gameProfiles).values({ userId }).onConflictDoNothing()
       const [profile] = await db.select().from(gameProfiles).where(eq(gameProfiles.userId, userId)).limit(1)
@@ -42,10 +43,14 @@ export default async function HomePage() {
           coins: profile.coins,
           applesCollected: profile.applesCollected,
           rewardedAdsWatched: profile.rewardedAdsWatched,
+          noUndoClears: profile.noUndoClears ?? 0,
+          birdsRescued: profile.birdsRescued ?? 0,
           settings: {
             soundEnabled: profile.settings.soundEnabled !== false,
             musicEnabled: profile.settings.musicEnabled !== false,
             leaderboardOptIn: profile.settings.leaderboardOptIn === true,
+            safeHint: profile.settings.safeHint === true,
+            hapticsEnabled: profile.settings.hapticsEnabled !== false,
           },
         }
       }
@@ -55,11 +60,12 @@ export default async function HomePage() {
         stars: levelProgress.stars,
         score: levelProgress.score,
         bestMoves: levelProgress.bestMoves,
+        noUndoClear: levelProgress.noUndoClear,
       })
         .from(levelProgress)
         .where(and(eq(levelProgress.userId, userId), isNotNull(levelProgress.completedAt)))
       initialCompletedLevels = Object.fromEntries(progress.map((entry) => [entry.levelId, entry.stars]))
-      initialLevelStats = Object.fromEntries(progress.map((entry) => [entry.levelId, { score: entry.score, bestMoves: entry.bestMoves }]))
+      initialLevelStats = Object.fromEntries(progress.map((entry) => [entry.levelId, { score: entry.score, bestMoves: entry.bestMoves, noUndoClear: entry.noUndoClear }]))
 
       const [walletRows, rewardRows] = await Promise.all([
         db.select({ id: walletTransactions.id, type: walletTransactions.type, amount: walletTransactions.amount, source: walletTransactions.source, referenceId: walletTransactions.referenceId, createdAt: walletTransactions.createdAt })

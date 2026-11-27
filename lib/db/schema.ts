@@ -8,7 +8,7 @@ import {
   text,
   timestamp,
 } from 'drizzle-orm/pg-core'
-import type { GameState } from '@/lib/game/engine'
+import type { GameState, PlayerSettings } from '@/lib/game/types'
 
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
@@ -64,7 +64,15 @@ export const gameProfiles = pgTable('game_profiles', {
   coins: integer('coins').notNull().default(0),
   applesCollected: integer('applesCollected').notNull().default(0),
   rewardedAdsWatched: integer('rewardedAdsWatched').notNull().default(0),
-  settings: jsonb('settings').$type<{ soundEnabled: boolean; musicEnabled: boolean; leaderboardOptIn: boolean }>().notNull().default({ soundEnabled: true, musicEnabled: true, leaderboardOptIn: false }),
+  noUndoClears: integer('noUndoClears').notNull().default(0),
+  birdsRescued: integer('birdsRescued').notNull().default(0),
+  settings: jsonb('settings').$type<PlayerSettings>().notNull().default({
+    soundEnabled: true,
+    musicEnabled: true,
+    leaderboardOptIn: false,
+    safeHint: false,
+    hapticsEnabled: true,
+  }),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
@@ -75,6 +83,8 @@ export const levelProgress = pgTable('level_progress', {
   stars: integer('stars').notNull().default(0),
   score: integer('score').notNull().default(0),
   bestMoves: integer('bestMoves'),
+  bestRouteType: text('bestRouteType').default('STANDARD'),
+  noUndoClear: boolean('noUndoClear').notNull().default(false),
   completedAt: timestamp('completedAt'),
 }, (table) => [primaryKey({ columns: [table.userId, table.levelId] })])
 
@@ -86,6 +96,8 @@ export const gameSessions = pgTable('game_sessions', {
   moveCount: integer('moveCount').notNull().default(0),
   score: integer('score').notNull().default(0),
   applesCollected: integer('applesCollected').notNull().default(0),
+  usedUndo: boolean('usedUndo').notNull().default(false),
+  starsEarned: integer('starsEarned'),
   state: jsonb('state').$type<{ current: GameState; history: GameState[] }>().notNull(),
   checkpointState: jsonb('checkpointState').$type<GameState>().notNull(),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
