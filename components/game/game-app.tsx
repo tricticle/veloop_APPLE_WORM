@@ -15,6 +15,7 @@ import {
   Leaf,
   LogOut,
   Map,
+  Bird,
   ShieldCheck,
   Sparkles,
   SlidersHorizontal,
@@ -360,8 +361,8 @@ export function GameApp({
 
   const firstName = user?.name.trim().split(/\s+/)[0]
   const displayViewHeading: Record<View, string> = {
-    adventure: firstName ? `Welcome back, ${firstName}.` : 'A fresh trail is waiting.',
-    levels: 'Choose your next little puzzle.',
+    adventure: firstName ? `Welcome back, ${firstName}.` : 'The forest is calling.',
+    levels: 'Choose your next trail.',
     rewards: 'Good runs grow good things.',
     achievements: 'Every good trail leaves a mark.',
     leaderboard: 'The grove’s most thoughtful trails.',
@@ -410,9 +411,10 @@ export function GameApp({
       <main className="page-content">
         <section className="page-intro" aria-labelledby="page-title">
           <div>
-            <p className="eyebrow"><span className="eyebrow-dot" /> A cozy puzzle adventure</p>
+            <p className="eyebrow"><span className="eyebrow-dot" /> A jungle trail adventure</p>
             <h1 id="page-title">{displayViewHeading[activeView]}</h1>
-            <p className="page-subtitle">Guide your little friend through the grove, collect the apples, and find the way out.</p>
+              <p className="page-subtitle">Guide your jungle friend along the wooden trail, gather apples, and dodge the birds guarding the moonlit portal.</p>
+
           </div>
           <div className="journey-progress">
             <span className="journey-icon"><Leaf aria-hidden="true" /></span>
@@ -512,7 +514,7 @@ export function GameApp({
                   </li>
                   <li className={game.collectedApples >= level.requiredApples ? 'trail-step-active' : ''}>
                     <span className="step-marker">2</span>
-                    <span><strong>Reach the portal</strong><small>Follow the violet glow</small></span>
+                    <span><strong>Reach the portal</strong><small>Follow the moonlit trail</small></span>
                   </li>
                 </ol>
                 <div className="trail-divider" />
@@ -520,7 +522,7 @@ export function GameApp({
                   <span><i className="legend-apple"><Apple aria-hidden="true" /></i> Apple</span>
                   <span><i className="legend-portal"><Sparkles aria-hidden="true" /></i> Portal</span>
                   <span><i className="legend-spike"><span /></i> Hazard</span>
-                  <span><i className="legend-moving"><span /></i> Moving block</span>
+                  <span><i className="legend-moving"><Bird aria-hidden="true" /></i> Flying bird</span>
                 </div>
               </section>
 

@@ -2914,3 +2914,1026 @@ input:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+:root {
+  color-scheme: light;
+  --background: #f0e7d5;
+  --foreground: #243c2c;
+  --card: #fff9ed;
+  --card-foreground: #243c2c;
+  --primary: #28613c;
+  --primary-foreground: #fffaf0;
+  --secondary: #e6eddc;
+  --secondary-foreground: #284e34;
+  --muted: #eee6d5;
+  --muted-foreground: #778272;
+  --accent: #f0d58f;
+  --accent-foreground: #674a1e;
+  --destructive: #bd473a;
+  --border: #e0d2b8;
+  --input: #ddd0b8;
+  --ring: #8ca56a;
+  --forest: #173e2b;
+  --forest-soft: #2f6940;
+  --sage: #8aa36e;
+  --sage-light: #e8eedf;
+  --cream: #f0e7d5;
+  --coral: #d8523f;
+  --gold: #d7a74c;
+  --ink-muted: #778272;
+}
+
+body {
+  background: #f0e7d5;
+  color: var(--foreground);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.game-shell {
+  background:
+    radial-gradient(ellipse at 12% 0%, rgba(176, 197, 131, 0.32), transparent 32rem),
+    radial-gradient(ellipse at 96% 14%, rgba(197, 164, 94, 0.17), transparent 27rem),
+    linear-gradient(180deg, #f3ead8 0%, #efe5d1 52%, #e8dfca 100%);
+}
+
+.topbar {
+  min-height: 74px;
+  border-bottom: 1px solid rgba(235, 215, 167, 0.24);
+  background: linear-gradient(95deg, #173e2b, #214d33 58%, #173a29);
+  box-shadow: 0 5px 18px rgba(27, 52, 34, 0.17);
+  color: #f7f0dc;
+}
+
+.brand-mark {
+  border: 1px solid rgba(241, 215, 153, 0.34);
+  background: linear-gradient(145deg, #9cbe62, #557f3f);
+  color: #183d29;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 3px 7px rgba(11, 34, 19, 0.25);
+}
+
+.brand-leaf {
+  fill: #f4ce6d;
+  stroke: #fff0c1;
+}
+
+.brand-copy strong,
+.brand-copy span {
+  color: #f6f0dd;
+}
+
+.brand-copy span {
+  opacity: 0.7;
+}
+
+.nav-button {
+  color: rgba(250, 246, 231, 0.74);
+}
+
+.nav-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fffdf4;
+}
+
+.nav-button-active {
+  background: #f0d58f;
+  color: #334b2c;
+  box-shadow: 0 2px 0 #c09349;
+}
+
+.nav-button-active:hover:not(:disabled) {
+  background: #f7e3ad;
+  color: #334b2c;
+}
+
+.coin-balance {
+  border-color: rgba(244, 216, 154, 0.35);
+  background: rgba(245, 218, 156, 0.13);
+  color: #f8e3ae;
+}
+
+.coin-balance span {
+  color: rgba(248, 227, 174, 0.76);
+}
+
+.coin-balance svg {
+  color: #f4c85d;
+}
+
+.top-signin-link {
+  color: #f4edd9;
+}
+
+.create-account-link {
+  background: #d5a449;
+  color: #263c2a;
+  box-shadow: 0 3px 0 #a87730;
+}
+
+.create-account-link:hover {
+  background: #e4b75a;
+}
+
+.avatar-chip {
+  border-color: rgba(246, 226, 181, 0.45);
+  background: #ead59a;
+  color: #28452e;
+}
+
+.page-content {
+  width: min(100%, 1420px);
+  padding-top: 16px;
+}
+
+.page-intro {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 112px;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: clamp(17px, 2vw, 24px);
+  border: 1px solid rgba(239, 219, 168, 0.25);
+  border-radius: 25px;
+  background:
+    radial-gradient(ellipse at 85% 105%, rgba(114, 153, 70, 0.32), transparent 26rem),
+    radial-gradient(ellipse at 10% -20%, rgba(111, 149, 68, 0.24), transparent 22rem),
+    linear-gradient(90deg, rgba(18, 48, 31, 0.88), rgba(20, 52, 32, 0.56) 58%, rgba(19, 46, 29, 0.64)),
+    url('/jungle-canopy.png') center 48% / cover;
+  box-shadow: 0 13px 28px rgba(48, 56, 34, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.page-intro::after {
+  position: absolute;
+  z-index: -1;
+  top: -112px;
+  right: 27%;
+  width: 290px;
+  height: 290px;
+  border: 1px solid rgba(240, 221, 170, 0.12);
+  border-radius: 50%;
+  box-shadow: 0 0 0 22px rgba(240, 221, 170, 0.035), 0 0 0 54px rgba(240, 221, 170, 0.025);
+  content: "";
+}
+
+.page-intro > div {
+  position: relative;
+  z-index: 1;
+}
+
+.eyebrow {
+  color: #dbc78d;
+}
+
+.eyebrow-dot {
+  background: #e3bc5c;
+  box-shadow: 0 0 0 4px rgba(224, 190, 101, 0.19);
+}
+
+.page-intro h1 {
+  color: #fff8e9;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(30px, 3vw, 38px);
+  letter-spacing: -0.04em;
+  text-shadow: 0 2px 12px rgba(14, 33, 19, 0.26);
+}
+
+.page-subtitle {
+  max-width: 590px;
+  margin-top: 6px;
+  color: rgba(249, 243, 223, 0.8);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.journey-progress {
+  position: relative;
+  z-index: 1;
+  border-color: rgba(247, 233, 197, 0.2);
+  background: rgba(255, 248, 227, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.journey-icon {
+  background: rgba(223, 199, 125, 0.18);
+  color: #f0d58f;
+}
+
+.journey-progress > div:nth-child(2) > span,
+.journey-progress strong small {
+  color: rgba(249, 243, 223, 0.7);
+}
+
+.journey-progress strong {
+  color: #fff8e9;
+}
+
+.journey-progress-track {
+  background: rgba(255, 248, 227, 0.2);
+}
+
+.journey-progress-track span {
+  background: linear-gradient(90deg, #d8bd69, #9dbf65);
+}
+
+.level-heading-row {
+  min-height: 48px;
+  margin-bottom: 8px;
+}
+
+.level-number-block {
+  border: 1px solid #b98850;
+  background: linear-gradient(rgba(31, 29, 17, 0.08), rgba(31, 29, 17, 0.08)), url('/jungle-wood-texture.png') center / cover;
+  color: #fff1cf;
+  box-shadow: inset 0 1px 0 rgba(255, 241, 207, 0.35), 0 3px 0 #68452a;
+}
+
+.level-world {
+  color: #8a7957;
+}
+
+.level-title-copy h2 {
+  color: #274632;
+  font-weight: 600;
+}
+
+.difficulty-badge {
+  border-color: #d7c598;
+  background: #f9f0d9;
+  color: #856d35;
+}
+
+.difficulty-medium {
+  border-color: #dfbe76;
+  background: #fff3d2;
+  color: #8e6820;
+}
+
+.difficulty-hard,
+.difficulty-expert {
+  border-color: #d8a08a;
+  background: #fbe7dd;
+  color: #9c4e37;
+}
+
+.change-level-button {
+  border-color: #d7c7a7;
+  background: #fff9ed;
+  color: #426044;
+  box-shadow: 0 2px 0 #e6d7ba;
+}
+
+.game-card {
+  border: 1px solid #d7c39b;
+  border-radius: 22px;
+  background: #fff9ed;
+  box-shadow: 0 13px 28px rgba(75, 57, 30, 0.12), inset 0 1px 0 #fffdf7;
+}
+
+.game-card-header {
+  padding: 12px 18px 11px;
+  border-bottom-color: #e8dcc2;
+  background: linear-gradient(180deg, #fffaf0, #f7efdd);
+}
+
+.objective-label,
+.quick-stat {
+  color: #877b63;
+}
+
+.objective-display strong {
+  color: #294a32;
+}
+
+.quick-stat strong {
+  color: #3f5c42;
+}
+
+.board-frame {
+  position: relative;
+  width: min(100% - 40px, 400px);
+  margin-top: 8px;
+  padding: 9px;
+  border: 4px solid #9b6939;
+  border-radius: 19px;
+  background: linear-gradient(135deg, rgba(255, 223, 157, 0.22), rgba(54, 30, 18, 0.12)), url('/jungle-wood-texture.png') center / cover;
+  box-shadow: inset 0 0 0 2px rgba(255, 220, 151, 0.42), 0 5px 0 #593a22, 0 14px 25px rgba(44, 35, 22, 0.22);
+}
+
+.board-frame::before {
+  position: absolute;
+  z-index: 5;
+  inset: 5px;
+  border: 1px solid rgba(255, 229, 177, 0.3);
+  border-radius: 11px;
+  content: "";
+  pointer-events: none;
+}
+
+.game-board {
+  position: relative;
+  gap: 0;
+  overflow: hidden;
+  border: 2px solid rgba(77, 49, 26, 0.8);
+  border-radius: 11px;
+  background: linear-gradient(rgba(89, 53, 24, 0.11), rgba(60, 43, 24, 0.15)), url('/jungle-wood-texture.png') center / 100% 100%;
+  box-shadow: inset 0 2px 9px rgba(39, 25, 12, 0.3), 0 1px 0 rgba(255, 224, 171, 0.45);
+}
+
+.game-tile {
+  overflow: visible;
+  border-right: 1px solid rgba(68, 43, 22, 0.16);
+  border-bottom: 1px solid rgba(68, 43, 22, 0.17);
+  border-radius: 0;
+  background: rgba(211, 163, 91, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 225, 165, 0.08);
+}
+
+.tile-even {
+  background: rgba(245, 206, 137, 0.15);
+  box-shadow: inset 0 0 0 1px rgba(255, 232, 185, 0.08);
+}
+
+.tile-odd {
+  background: rgba(68, 89, 42, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 232, 185, 0.05);
+}
+
+.tile-worm-body,
+.tile-worm-head {
+  background: transparent;
+  box-shadow: none;
+  animation: worm-pop 180ms ease-out both;
+}
+
+.tile-worm-body {
+  z-index: 2;
+}
+
+.tile-worm-head {
+  z-index: 3;
+}
+
+.tile-apple,
+.tile-portal,
+.tile-obstacle {
+  z-index: 4;
+}
+
+.worm-path-overlay {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.worm-path-shadow,
+.worm-path-body,
+.worm-path-shine {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.worm-path-shadow {
+  stroke: #0e4b24;
+  stroke-width: 0.82;
+  filter: drop-shadow(0 0.06px 0.04px rgba(12, 34, 14, 0.7));
+}
+
+.worm-path-body {
+  stroke: url(#worm-gradient-1);
+  stroke-width: 0.66;
+}
+
+.worm-path-shine {
+  stroke: rgba(205, 255, 143, 0.48);
+  stroke-width: 0.08;
+  transform: translateY(-0.15px);
+}
+
+.worm-path-scale {
+  fill: rgba(15, 92, 34, 0.48);
+  stroke: rgba(178, 244, 116, 0.46);
+  stroke-width: 0.025;
+}
+
+.worm-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+  animation: worm-blink 4s ease-in-out infinite;
+}
+
+.worm-face-left {
+  transform: rotate(180deg);
+}
+
+.worm-face-up {
+  transform: rotate(-90deg);
+}
+
+.worm-face-down {
+  transform: rotate(90deg);
+}
+
+.worm-eye {
+  top: 24%;
+  width: 28%;
+  height: 32%;
+  border: 1.5px solid #164b29;
+  background: #fffdf2;
+  box-shadow: inset 0 -2px 0 rgba(29, 68, 34, 0.12), 0 1px 2px rgba(6, 39, 16, 0.25);
+}
+
+.worm-eye::after {
+  right: 19%;
+  bottom: 18%;
+  width: 48%;
+  height: 48%;
+  background: #173d25;
+  box-shadow: -1px -1px 0 1px rgba(255, 255, 255, 0.96);
+}
+
+.worm-eye-left {
+  left: 24%;
+}
+
+.worm-eye-right {
+  right: 21%;
+}
+
+.worm-cheek {
+  position: absolute;
+  right: 8%;
+  bottom: 25%;
+  width: 15%;
+  height: 8%;
+  border-radius: 50%;
+  background: rgba(255, 129, 93, 0.62);
+  filter: blur(1px);
+}
+
+.worm-smile {
+  bottom: 19%;
+  left: 52%;
+  width: 24%;
+  height: 10%;
+  border-bottom: 2px solid #174a29;
+  border-radius: 0 0 50% 50%;
+}
+
+.worm-scale {
+  width: 18%;
+  height: 18%;
+  border: 1px solid rgba(191, 255, 128, 0.4);
+  border-radius: 50%;
+  background: rgba(13, 111, 43, 0.42);
+  box-shadow: 0 0 3px rgba(181, 246, 110, 0.4);
+}
+
+.wildlife-butterfly {
+  position: absolute;
+  z-index: 5;
+  right: 13%;
+  bottom: 13%;
+  width: 32%;
+  height: 32%;
+  color: #ffe08a;
+  filter: drop-shadow(0 1px 3px rgba(32, 29, 11, 0.5));
+  animation: butterfly-drift 3s ease-in-out infinite;
+}
+
+.tile-apple {
+  background-color: rgba(255, 201, 111, 0.25);
+}
+
+.apple-token {
+  border: 1px solid #9a3026;
+  background: radial-gradient(circle at 31% 25%, #ff9a67, #ed4834 52%, #b92827);
+  color: #fff2d9;
+  filter: drop-shadow(0 3px 2px rgba(66, 28, 17, 0.45));
+  animation: apple-bob 2.8s ease-in-out infinite;
+}
+
+.apple-token > svg:first-child {
+  fill: #ee4938;
+  stroke: #fff1d6;
+  stroke-width: 1.8;
+}
+
+.apple-golden {
+  border-color: #9d6c20;
+  background: radial-gradient(circle at 31% 25%, #fff09d, #e7ad35 55%, #a96c1c);
+  color: #fff7ca;
+}
+
+.apple-golden > svg:first-child {
+  fill: #f0c34f;
+}
+
+.tile-portal {
+  background-color: rgba(126, 114, 171, 0.26);
+}
+
+.portal-token {
+  border: 2px solid #f5d994;
+  background: radial-gradient(circle at center, #9e87ec 0 17%, #3e3a72 45%, #252346 72%);
+  color: #fff1ae;
+  box-shadow: 0 0 0 3px rgba(224, 195, 110, 0.62), 0 0 13px rgba(149, 126, 227, 0.76), 0 4px 8px rgba(34, 26, 58, 0.4);
+}
+
+.portal-core {
+  background: #fff8c9;
+  box-shadow: 0 0 10px #ffec9b;
+}
+
+.tile-obstacle {
+  background-color: rgba(98, 61, 33, 0.34);
+}
+
+.obstacle-wall-icon {
+  fill: #8d5c34;
+  color: #f1c27b;
+  filter: drop-shadow(0 2px 2px rgba(47, 31, 18, 0.45));
+}
+
+.obstacle-spike-icon {
+  fill: #b64c37;
+  color: #f9d39a;
+  filter: drop-shadow(0 2px 2px rgba(47, 31, 18, 0.4));
+}
+
+.obstacle-gate-icon {
+  color: #f4cf7f;
+  filter: drop-shadow(0 1px 2px rgba(47, 31, 18, 0.4));
+}
+
+.obstacle-moving-icon {
+  color: #ffe387;
+  fill: rgba(236, 145, 51, 0.28);
+  filter: drop-shadow(0 2px 3px rgba(47, 31, 18, 0.55));
+  animation: bird-flit 1.25s ease-in-out infinite;
+}
+
+.pit-token {
+  border-color: #bf9963;
+  background: radial-gradient(circle, #131b1b 0 44%, #273b2a 58%, #806344 72%, #e1ba7c 100%);
+  box-shadow: inset 0 4px 7px rgba(0, 0, 0, 0.72), 0 1px 0 rgba(255, 226, 173, 0.45);
+}
+
+.board-progress-row {
+  color: #867756;
+}
+
+.apple-progress-track span {
+  border-color: #dccba7;
+  background: #fbf4e4;
+  color: #aa9b77;
+}
+
+.apple-progress-track .apple-progress-filled {
+  border-color: #df9e76;
+  background: #ffe7d9;
+  color: #c44734;
+}
+
+.game-controls-wrap {
+  padding-top: 14px;
+}
+
+.direction-button {
+  border-color: #b4c39b;
+  background: linear-gradient(180deg, #f1f5e8, #dfe9d4);
+  color: #315b38;
+  box-shadow: 0 3px 0 #b2c09b;
+}
+
+.direction-button:hover:not(:disabled) {
+  background: #e0edcf;
+}
+
+.direction-hint {
+  border-color: #d3a547;
+  background: #fff1c7;
+  color: #72531c;
+  box-shadow: 0 0 0 3px rgba(213, 175, 93, 0.24);
+}
+
+.utility-button {
+  border-color: #ddcfb3;
+  background: #fffaf0;
+  color: #52634a;
+  box-shadow: 0 2px 0 #e8ddc6;
+}
+
+.utility-restart {
+  background: transparent;
+  box-shadow: none;
+}
+
+.control-hint {
+  color: #958b74;
+}
+
+.control-hint kbd {
+  border-color: #d8c9a9;
+  background: #fff9ed;
+  color: #576746;
+}
+
+.sidebar-card,
+.view-panel,
+.reward-history,
+.ad-provider-card {
+  border-color: #ddccaa;
+  background: linear-gradient(145deg, rgba(255, 250, 239, 0.96), rgba(249, 239, 216, 0.94));
+  box-shadow: 0 8px 22px rgba(75, 57, 30, 0.085), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.sidebar-card h3,
+.view-heading h2,
+.sidebar-card h3 {
+  color: #294732;
+}
+
+.sidebar-icon-green {
+  background: #e4ecd6;
+  color: #476c3d;
+}
+
+.sidebar-icon-gold {
+  background: #f5e6bd;
+  color: #a47824;
+}
+
+.card-kicker {
+  color: #938363;
+}
+
+.sidebar-card > p,
+.view-description {
+  color: #766f5d;
+}
+
+.trail-step-active .step-marker {
+  background: #447344;
+}
+
+.sidebar-tip {
+  border-color: #e6d4a4;
+  background: linear-gradient(130deg, #fff4d7, #f7e8c2);
+  box-shadow: 0 5px 14px rgba(93, 70, 29, 0.08);
+}
+
+.tip-icon {
+  background: #f0dda4;
+  color: #9b7226;
+}
+
+.session-note {
+  color: #7b7867;
+}
+
+.session-note svg {
+  color: #60804a;
+}
+
+.view-panel {
+  border-radius: 23px;
+}
+
+.levels-progress-pill {
+  border-color: #d9c394;
+  background: #fff2d6;
+  color: #6b5329;
+  box-shadow: 0 3px 0 #e2d1a9;
+}
+
+.world-group {
+  position: relative;
+  padding: 16px;
+  border: 1px solid #e4d4b2;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(244, 235, 214, 0.74), rgba(255, 250, 237, 0.8));
+}
+
+.world-group + .world-group {
+  margin-top: 18px;
+}
+
+.world-heading {
+  margin-bottom: 13px;
+}
+
+.world-number {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  border: 1px solid #c29c5d;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #f4df9c, #d1a24e);
+  color: #5e471e;
+  font-size: 9px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 2px 0 #b88d4b;
+}
+
+.world-heading h3 {
+  color: #365536;
+  font-weight: 650;
+}
+
+.world-range {
+  padding: 5px 9px;
+  border: 1px solid #e2d1aa;
+  border-radius: 99px;
+  background: rgba(255, 249, 235, 0.8);
+  color: #857554;
+}
+
+.level-tile {
+  border: 1px solid #b88a4f;
+  border-radius: 13px;
+  background: linear-gradient(145deg, #f7e8c1, #e6cc91);
+  color: #594324;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.77), 0 3px 0 #b0854b, 0 5px 9px rgba(94, 64, 28, 0.1);
+  transition: transform 160ms ease, filter 160ms ease, box-shadow 160ms ease;
+}
+
+.level-tile:hover:not(:disabled) {
+  border-color: #8f6b3b;
+  background: linear-gradient(145deg, #fff1ca, #ead18f);
+  box-shadow: inset 0 1px 0 #fff8df, 0 4px 0 #a8793e, 0 8px 12px rgba(94, 64, 28, 0.16);
+  transform: translateY(-2px) rotate(-1deg);
+}
+
+.level-tile-number {
+  color: inherit;
+  font-weight: 800;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.level-locked {
+  border-color: #d7ceb8;
+  background: linear-gradient(145deg, #e6e0d1, #d8d1c0);
+  color: #a29a87;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 0 #c6bba3;
+}
+
+.level-complete {
+  border-color: #52783d;
+  background: linear-gradient(145deg, #a9cf6a, #68a34d);
+  color: #193e27;
+  box-shadow: inset 0 1px 0 rgba(247, 255, 199, 0.52), 0 3px 0 #477c40, 0 5px 10px rgba(52, 91, 41, 0.16);
+}
+
+.level-complete:hover:not(:disabled) {
+  border-color: #426d36;
+  background: linear-gradient(145deg, #b8db79, #79b85a);
+}
+
+.level-dot {
+  width: 7px;
+  height: 7px;
+  background: #789649;
+  box-shadow: 0 0 0 3px rgba(121, 151, 73, 0.16);
+}
+
+.level-stars {
+  right: 4px;
+  bottom: 4px;
+  padding: 2px 4px;
+  border-radius: 999px;
+  background: rgba(255, 247, 221, 0.78);
+  color: #9b6e1c;
+}
+
+.page-footer {
+  color: #776e5b;
+}
+
+.page-footer > span:first-child {
+  color: #315238;
+}
+
+.page-footer svg {
+  color: #a17c36;
+}
+
+.game-notice,
+.game-feedback {
+  border-color: #d8e1c8;
+  background: #f0f6e7;
+  color: #41633a;
+}
+
+.game-feedback {
+  border-color: #ebd7a9;
+  background: #fff5d9;
+  color: #826423;
+}
+
+.game-feedback-danger,
+.result-banner-failed {
+  border-color: #e8c8b6;
+  background: #fff0e8;
+  color: #9c4e37;
+}
+
+.result-banner {
+  border-color: #d3dfbb;
+  background: linear-gradient(120deg, #edf5df, #f8f4de);
+}
+
+.result-banner strong {
+  color: #365b38;
+}
+
+.result-stars .star-earned {
+  color: #d3a648;
+}
+
+.sidebar-link-button,
+.result-link,
+.sidebar-inline-link {
+  color: #376943;
+}
+
+@keyframes butterfly-drift {
+  0%, 100% { transform: translate(0, 0) rotate(-10deg); }
+  50% { transform: translate(-2px, -4px) rotate(12deg); }
+}
+
+@keyframes bird-flit {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-3px) rotate(4deg); }
+}
+
+@keyframes worm-blink {
+  0%, 45%, 49%, 100% { transform: scaleY(1); }
+  47% { transform: scaleY(0.12); }
+}
+
+@media (max-width: 900px) {
+  .topbar {
+    min-height: 68px;
+    flex-wrap: wrap;
+    gap: 0 14px;
+    padding: 11px 20px;
+  }
+
+  .top-navigation {
+    order: 3;
+    width: 100%;
+    height: auto;
+    justify-content: center;
+    padding-top: 8px;
+  }
+
+  .page-intro {
+    align-items: flex-start;
+  }
+
+  .adventure-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sidebar-column {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    gap: 0 8px;
+    padding: 10px 14px;
+  }
+
+  .page-content {
+    padding: 21px 14px 18px;
+  }
+
+  .page-intro {
+    min-height: 0;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 17px;
+    padding: 24px 20px;
+    border-radius: 19px;
+  }
+
+  .page-intro h1 {
+    font-size: 32px;
+  }
+
+  .journey-progress {
+    width: 100%;
+    grid-template-columns: 35px 1fr;
+    padding: 9px 12px;
+  }
+
+  .level-heading-row {
+    gap: 8px;
+  }
+
+  .level-number-block {
+    width: 38px;
+    height: 38px;
+  }
+
+  .level-title-copy h2 {
+    font-size: 17px;
+  }
+
+  .change-level-button {
+    height: 32px;
+    padding-inline: 8px;
+    font-size: 9px;
+  }
+
+  .game-card {
+    border-radius: 17px;
+  }
+
+  .game-card-header {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .quick-stats {
+    gap: 9px;
+  }
+
+  .board-frame {
+    width: min(100% - 22px, 440px);
+    margin-top: 14px;
+    padding: 8px;
+    border-width: 3px;
+    border-radius: 15px;
+  }
+
+  .game-board {
+    border-radius: 8px;
+  }
+
+  .game-controls-wrap {
+    padding: 12px 10px 15px;
+  }
+
+  .game-controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .direction-pad {
+    width: 116px;
+    grid-template-columns: repeat(3, 36px);
+    grid-template-rows: repeat(2, 34px);
+    gap: 4px;
+  }
+
+  .direction-button {
+    width: 36px;
+    height: 34px;
+  }
+
+  .sidebar-column {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .view-panel {
+    min-height: 360px;
+    padding: 19px 13px;
+    border-radius: 18px;
+  }
+
+  .world-group {
+    padding: 11px;
+  }
+
+  .world-heading h3 {
+    font-size: 14px;
+  }
+
+  .world-range {
+    padding: 4px 6px;
+    font-size: 8px;
+  }
+
+  .level-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .level-tile {
+    border-radius: 11px;
+  }
+}

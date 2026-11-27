@@ -15,7 +15,7 @@ export function LevelSelect({ levels, unlockedThrough, completedLevels, levelSta
       <div className="view-heading">
         <div>
           <p className="eyebrow">Choose your next trail</p>
-          <h2 id="levels-title">The grove has 50 little puzzles.</h2>
+          <h2 id="levels-title">50 trails across five wild worlds.</h2>
           <p className="view-description">Finish a level to open the next one. Replay any path you have already unlocked.</p>
         </div>
         <div className="levels-progress-pill">{Math.min(unlockedThrough, 50)} <span>of 50 open</span></div>

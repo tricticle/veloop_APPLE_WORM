@@ -168,7 +168,7 @@ function buildLevel(id: number): GameLevel {
   }
 
   const parMoves = path.length - 1
-  const moveBonus = difficulty === 'BEGINNER' ? 12 : difficulty === 'EASY' ? 9 : difficulty === 'MEDIUM' ? 7 : difficulty === 'HARD' ? 5 : 4
+  const moveBonus = difficulty === 'BEGINNER' ? 9 : difficulty === 'EASY' ? 7 : difficulty === 'MEDIUM' ? 5 : difficulty === 'HARD' ? 3 : 2
   const requiredApples = objective === 'COLLECTION' ? Math.max(1, apples.length - 1) : apples.length
 
   return {
