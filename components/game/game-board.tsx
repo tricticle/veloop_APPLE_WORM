@@ -66,6 +66,100 @@ function splitContiguousPaths(points: Coordinate[]): string[] {
     .map((chunk) => chunk.map(({ x, y }) => `${x + 0.5},${y + 0.5}`).join(' '))
 }
 
+function buildCurvedWormPaths(
+  points: Coordinate[],
+  moveCount: number,
+): { paths: string[]; displacedPoints: Map<number, { x: number; y: number }> } {
+  const displacedPoints = new Map<number, { x: number; y: number }>()
+  if (!points.length) return { paths: [], displacedPoints }
+
+  const chunks: Array<Array<{ coord: Coordinate; index: number }>> = [
+    [{ coord: points[0], index: 0 }],
+  ]
+  for (let i = 1; i < points.length; i += 1) {
+    const prev = points[i - 1]
+    const curr = points[i]
+    const manhattan = Math.abs(prev.x - curr.x) + Math.abs(prev.y - curr.y)
+    if (manhattan > 1) {
+      chunks.push([{ coord: curr, index: i }])
+    } else {
+      chunks[chunks.length - 1].push({ coord: curr, index: i })
+    }
+  }
+
+  const paths: string[] = []
+  const amp = 0.065
+
+  for (const chunk of chunks) {
+    if (chunk.length < 2) continue
+
+    if (chunk.length === 2) {
+      const a = { x: chunk[0].coord.x + 0.5, y: chunk[0].coord.y + 0.5 }
+      const b = { x: chunk[1].coord.x + 0.5, y: chunk[1].coord.y + 0.5 }
+      displacedPoints.set(chunk[0].index, a)
+      displacedPoints.set(chunk[1].index, b)
+      const dx = b.x - a.x
+      const dy = b.y - a.y
+      const len = Math.hypot(dx, dy) || 1
+      const nx = -dy / len
+      const ny = dx / len
+      const sign = (moveCount + chunk[0].index) % 2 === 0 ? 1 : -1
+      const cp1x = a.x + dx * 0.35 + nx * amp * sign
+      const cp1y = a.y + dy * 0.35 + ny * amp * sign
+      const cp2x = a.x + dx * 0.65 - nx * amp * sign
+      const cp2y = a.y + dy * 0.65 - ny * amp * sign
+      paths.push(
+        `M ${a.x} ${a.y} C ${cp1x.toFixed(3)} ${cp1y.toFixed(3)}, ${cp2x.toFixed(3)} ${cp2y.toFixed(3)}, ${b.x} ${b.y}`,
+      )
+      continue
+    }
+
+    const pts = chunk.map((item, j) => {
+      const base = { x: item.coord.x + 0.5, y: item.coord.y + 0.5 }
+      if (j === 0 || j === chunk.length - 1) {
+        displacedPoints.set(item.index, base)
+        return base
+      }
+      const prev = chunk[j - 1].coord
+      const curr = item.coord
+      const next = chunk[j + 1].coord
+      const dxIn = curr.x - prev.x
+      const dyIn = curr.y - prev.y
+      const dxOut = next.x - curr.x
+      const dyOut = next.y - curr.y
+      const isStraight = dxIn * dyOut - dyIn * dxOut === 0
+      if (!isStraight) {
+        displacedPoints.set(item.index, base)
+        return base
+      }
+      const len = Math.hypot(dxOut, dyOut) || 1
+      const nx = -dyOut / len
+      const ny = dxOut / len
+      const sign = (moveCount + item.index) % 2 === 0 ? 1 : -1
+      const pt = { x: base.x + nx * amp * sign, y: base.y + ny * amp * sign }
+      displacedPoints.set(item.index, pt)
+      return pt
+    })
+
+    const tension = 0.16
+    let d = `M ${pts[0].x} ${pts[0].y}`
+    for (let j = 0; j < pts.length - 1; j += 1) {
+      const p0 = j === 0 ? pts[0] : pts[j - 1]
+      const p1 = pts[j]
+      const p2 = pts[j + 1]
+      const p3 = j + 1 === pts.length - 1 ? pts[pts.length - 1] : pts[j + 2]
+      const cp1x = p1.x + (p2.x - p0.x) * tension
+      const cp1y = p1.y + (p2.y - p0.y) * tension
+      const cp2x = p2.x - (p3.x - p1.x) * tension
+      const cp2y = p2.y - (p3.y - p1.y) * tension
+      d += ` C ${cp1x.toFixed(3)} ${cp1y.toFixed(3)}, ${cp2x.toFixed(3)} ${cp2y.toFixed(3)}, ${p2.x.toFixed(3)} ${p2.y.toFixed(3)}`
+    }
+    paths.push(d)
+  }
+
+  return { paths, displacedPoints }
+}
+
 export function GameBoard({
   level,
   state,
@@ -158,9 +252,12 @@ export function GameBoard({
       ? (Math.atan2(tail.y - beforeTail.y, tail.x - beforeTail.x) * 180) / Math.PI
       : 0
 
-  // Draw the uniform body polyline up to beforeTail when the tail tapers seamlessly from it
+  // Draw the uniform body path up to beforeTail when the tail tapers seamlessly from it
   const bodyPoints = !tailJump && state.worm.length > 1 ? state.worm.slice(0, -1) : state.worm
-  const wormContiguousPolylines = splitContiguousPaths(bodyPoints)
+  const { paths: wormBodyPaths, displacedPoints } = buildCurvedWormPaths(
+    bodyPoints,
+    state.moves,
+  )
 
   const bodySpots = state.worm.slice(1, -1).map((segment, index) => {
     const wormIndex = index + 1
@@ -174,10 +271,11 @@ export function GameBoard({
     const angle = (Math.atan2(dy, dx) * 180) / Math.PI
     const progress = state.worm.length > 2 ? wormIndex / (state.worm.length - 1) : 0.5
     const radius = 0.14 - progress * 0.03
+    const displaced = displacedPoints.get(wormIndex)
     return {
       key: `${segment.x},${segment.y},${wormIndex}`,
-      cx: segment.x + 0.5,
-      cy: segment.y + 0.5,
+      cx: displaced ? displaced.x : segment.x + 0.5,
+      cy: displaced ? displaced.y : segment.y + 0.5,
       angle,
       radius,
       pulseDelay: `${-wormIndex * 0.09}s`,
@@ -230,7 +328,10 @@ export function GameBoard({
         className={`game-board ${isFailed ? `game-board-failed game-board-failed-${state.failureCause ?? 'unknown'}` : ''} ${isCompleted ? 'game-board-completed' : ''}`}
         role="grid"
         aria-label={`Level ${String(level.id).padStart(2, '0')} game board, ${level.grid.columns} columns by ${level.grid.rows} rows`}
-        style={{ gridTemplateColumns: `repeat(${level.grid.columns}, minmax(0, 1fr))` }}
+        style={{
+          gridTemplateColumns: `repeat(${level.grid.columns}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${level.grid.rows}, minmax(0, 1fr))`,
+        }}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
@@ -523,8 +624,15 @@ export function GameBoard({
           )}
 
           {/* Pass 1: Unified dark forest-green silhouette (body + seamless tapered tail) */}
-          {wormContiguousPolylines.map((points, idx) => (
-            <polyline key={`worm-outline-${idx}`} className="worm-path-shadow" points={points} />
+          {wormBodyPaths.map((d, idx) => (
+            <path
+              key={`worm-outline-${idx}`}
+              className="worm-path-shadow"
+              d={d}
+              strokeWidth={0.62}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           ))}
           {tail && beforeTail && !tailJump && (
             <g transform={`translate(${beforeTail.x + 0.5}, ${beforeTail.y + 0.5}) rotate(${tailAngle})`}>
@@ -541,8 +649,15 @@ export function GameBoard({
           )}
 
           {/* Pass 2: Unified vibrant green body + seamless tapered tail (exact match to head) */}
-          {wormContiguousPolylines.map((points, idx) => (
-            <polyline key={`worm-body-${idx}`} className="worm-path-body" points={points} />
+          {wormBodyPaths.map((d, idx) => (
+            <path
+              key={`worm-body-${idx}`}
+              className="worm-path-body"
+              d={d}
+              strokeWidth={0.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           ))}
           {tail && beforeTail && !tailJump && (
             <g transform={`translate(${beforeTail.x + 0.5}, ${beforeTail.y + 0.5}) rotate(${tailAngle})`}>
@@ -566,8 +681,15 @@ export function GameBoard({
           )}
 
           {/* Pass 3: Centered dorsal highlight & subtle texture spots */}
-          {wormContiguousPolylines.map((points, idx) => (
-            <polyline key={`worm-shine-${idx}`} className="worm-path-shine" points={points} />
+          {wormBodyPaths.map((d, idx) => (
+            <path
+              key={`worm-shine-${idx}`}
+              className="worm-path-shine"
+              d={d}
+              strokeWidth={0.1}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           ))}
           {bodySpots.map(({ key, cx, cy, angle, radius, pulseDelay }) => (
             <g
@@ -850,7 +972,7 @@ export function GameBoard({
         </svg>
 
         {/* Floating Apple Combo / Streak Score Popup */}
-        {state.lastComboPoints && state.lastComboPoints > 0 && (
+        {Boolean(state.lastComboPoints && state.lastComboPoints > 0) && (
           <div
             key={`popup-${state.moves}`}
             className="board-score-popup"

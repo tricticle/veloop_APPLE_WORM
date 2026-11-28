@@ -653,6 +653,7 @@ input:focus-visible {
   position: relative;
   display: grid;
   min-width: 0;
+  min-height: 0;
   aspect-ratio: 1;
   place-items: center;
   overflow: hidden;
@@ -3390,8 +3391,8 @@ body {
 }
 
 .worm-svg-head {
-  transform-box: fill-box;
-  transform-origin: center;
+  transform-box: view-box;
+  transform-origin: 0px 0px;
 }
 
 .worm-tongue {
@@ -4778,25 +4779,26 @@ body {
 
 /* --- Worm Tail Wiggle, Squash/Stretch & Blink --- */
 .worm-tail-wiggle {
+  transform-box: view-box;
   transform-origin: 0px 0px;
   animation: tail-wiggle 2.2s ease-in-out infinite;
 }
 
 .worm-head-move-squash-x {
-  transform-box: fill-box;
-  transform-origin: center;
+  transform-box: view-box;
+  transform-origin: 0px 0px;
   animation: head-squash-x 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .worm-head-move-squash-y {
-  transform-box: fill-box;
-  transform-origin: center;
+  transform-box: view-box;
+  transform-origin: 0px 0px;
   animation: head-squash-y 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .worm-head-ate-pop {
-  transform-box: fill-box;
-  transform-origin: center;
+  transform-box: view-box;
+  transform-origin: 0px 0px;
   animation: head-ate-pop 280ms cubic-bezier(0.2, 1.35, 0.4, 1) both;
 }
 
