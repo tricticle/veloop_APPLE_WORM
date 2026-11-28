@@ -846,11 +846,6 @@ export function GameApp({
                       <span>3★ Par</span>
                       <strong>≤{starThresholds.threeStars}</strong>
                     </div>
-                    <div className="quick-stat">
-                      <Star aria-hidden="true" />
-                      <span>Score</span>
-                      <strong>{game.score}</strong>
-                    </div>
                   </div>
                 </div>
 

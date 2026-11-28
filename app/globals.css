@@ -61,7 +61,8 @@
 }
 
 html {
-  min-width: 320px;
+  min-width: 0;
+  overflow-x: clip;
   background: var(--background);
   scroll-behavior: smooth;
 }
@@ -69,6 +70,7 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
+  overflow-x: clip;
   background: var(--background);
   color: var(--foreground);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -105,6 +107,7 @@ input:focus-visible {
 
 .game-shell {
   min-height: 100vh;
+  overflow-x: clip;
   background:
     radial-gradient(ellipse at 91% 2%, rgba(218, 229, 207, 0.24), transparent 28rem),
     var(--background);
@@ -127,7 +130,8 @@ input:focus-visible {
 
 .brand-lockup {
   display: inline-flex;
-  min-width: max-content;
+  min-width: 0;
+  flex: 1 1 auto;
   align-items: center;
   gap: 11px;
 }
@@ -137,6 +141,7 @@ input:focus-visible {
   display: grid;
   width: 40px;
   height: 40px;
+  flex: 0 0 auto;
   place-items: center;
   border-radius: 14px;
   background: #e8f0e4;
@@ -163,6 +168,7 @@ input:focus-visible {
 
 .brand-copy {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   gap: 3px;
 }
@@ -181,9 +187,12 @@ input:focus-visible {
 }
 
 .brand-copy span {
+  overflow: hidden;
   color: #89948b;
   font-size: 11px;
   letter-spacing: 0.015em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .top-navigation {
@@ -214,10 +223,11 @@ input:focus-visible {
 
 .account-actions {
   display: flex;
-  min-width: max-content;
+  min-width: 0;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 10px;
 }
 
 .coin-balance {
@@ -522,16 +532,18 @@ input:focus-visible {
 
 .game-card-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
+  gap: 12px 18px;
   padding: 17px 20px 15px;
   border-bottom: 1px solid #eff1ec;
 }
 
 .objective-display {
   display: flex;
-  min-width: 120px;
+  min-width: 0;
+  flex: 1 1 210px;
   flex-direction: column;
   gap: 5px;
 }
@@ -551,11 +563,13 @@ input:focus-visible {
   color: #344e38;
   font-size: 14px;
   font-weight: 750;
+  white-space: nowrap;
 }
 
 .objective-display strong svg {
   width: 16px;
   height: 16px;
+  flex: 0 0 auto;
   color: #cd5d4e;
 }
 
@@ -566,23 +580,29 @@ input:focus-visible {
 }
 
 .quick-stats {
-  display: flex;
+  display: grid;
+  min-width: 0;
+  flex: 0 1 auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
-  gap: 19px;
+  gap: 8px;
 }
 
 .quick-stat {
-  display: grid;
-  grid-template-columns: 16px auto auto;
+  display: flex;
+  min-width: 0;
   align-items: center;
-  column-gap: 6px;
+  justify-content: center;
+  gap: 5px;
   color: #8a958b;
-  font-size: 10px;
+  font-size: 11px;
+  white-space: nowrap;
 }
 
 .quick-stat svg {
   width: 14px;
   height: 14px;
+  flex: 0 0 auto;
   color: #80927d;
 }
 
@@ -857,9 +877,10 @@ input:focus-visible {
 .board-progress-row {
   display: flex;
   width: min(100% - 40px, 460px);
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px 12px;
   margin: 11px auto 0;
   color: #829084;
   font-size: 10px;
@@ -867,6 +888,7 @@ input:focus-visible {
 
 .apple-progress-track {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 5px;
 }
@@ -969,7 +991,9 @@ input:focus-visible {
 
 .utility-controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 7px;
 }
 
@@ -994,12 +1018,14 @@ input:focus-visible {
 
 .control-hint {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 4px;
   margin: 9px 0 0;
   color: #a0a9a0;
   font-size: 9px;
+  text-align: center;
 }
 
 .control-hint kbd {
@@ -1469,7 +1495,8 @@ input:focus-visible {
 
 .levels-progress-pill {
   display: flex;
-  min-width: max-content;
+  min-width: 0;
+  max-width: 100%;
   align-items: baseline;
   gap: 6px;
   padding: 10px 13px;
@@ -1493,8 +1520,9 @@ input:focus-visible {
 
 .world-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 6px 10px;
   margin-bottom: 12px;
 }
 
@@ -1678,8 +1706,15 @@ input:focus-visible {
 
 .ad-provider-copy {
   display: flex;
+  min-width: 0;
+  flex: 1;
   align-items: flex-start;
   gap: 12px;
+}
+
+.ad-provider-copy > div:last-child {
+  min-width: 0;
+  flex: 1;
 }
 
 .ad-provider-icon {
@@ -1700,8 +1735,9 @@ input:focus-visible {
 
 .provider-title-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 9px;
+  gap: 6px 9px;
 }
 
 .provider-title-row h3 {
@@ -1768,8 +1804,9 @@ input:focus-visible {
 }
 
 .reward-history-heading {
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 12px;
+  gap: 6px 12px;
   margin-bottom: 8px;
 }
 
@@ -1953,9 +1990,10 @@ input:focus-visible {
 
 .achievement-title-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 4px 10px;
 }
 
 .achievement-title-row h3 {
@@ -2177,6 +2215,8 @@ input:focus-visible {
 .settings-section-title > div,
 .setting-copy {
   display: flex;
+  min-width: 0;
+  flex: 1;
   flex-direction: column;
   gap: 4px;
 }
@@ -2541,15 +2581,23 @@ input:focus-visible {
   }
 
   .top-navigation {
+    display: grid;
     height: auto;
     order: 3;
     width: 100%;
-    justify-content: center;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
     padding-top: 8px;
   }
 
   .nav-button {
-    flex-shrink: 0;
+    width: 100%;
+    min-width: 0;
+    justify-content: center;
+    padding-inline: 6px;
+    gap: 5px;
+    font-size: 11px;
+    white-space: nowrap;
   }
 
   .adventure-layout {
@@ -2569,6 +2617,21 @@ input:focus-visible {
 
   .session-note {
     padding: 8px;
+  }
+}
+
+@media (max-width: 740px) {
+  .nav-button {
+    padding-inline: 0;
+  }
+
+  .nav-button > span {
+    display: none;
+  }
+
+  .nav-button svg {
+    width: 16px;
+    height: 16px;
   }
 }
 
@@ -2623,18 +2686,16 @@ input:focus-visible {
   }
 
   .top-navigation {
-    justify-content: flex-start;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .top-navigation::-webkit-scrollbar {
-    display: none;
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+    overflow: visible;
   }
 
   .nav-button {
-    width: 36px;
-    height: 34px;
+    width: 100%;
+    height: 38px;
     flex-shrink: 0;
     justify-content: center;
     padding-inline: 0;
@@ -2646,14 +2707,8 @@ input:focus-visible {
   }
 
   .nav-button svg {
-    width: 15px;
-    height: 15px;
-  }
-
-  .top-navigation {
-    justify-content: space-between;
-    overflow: visible;
-    gap: 4px;
+    width: 16px;
+    height: 16px;
   }
 
   .page-content {
@@ -2739,22 +2794,23 @@ input:focus-visible {
   }
 
   .quick-stats {
-    gap: 11px;
+    gap: 8px;
   }
 
   .quick-stat {
-    grid-template-columns: 14px auto;
-    column-gap: 4px;
-    font-size: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 11px;
+    white-space: nowrap;
   }
 
   .quick-stat strong {
-    grid-column: 2;
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .quick-stat svg {
-    grid-row: span 2;
     width: 13px;
     height: 13px;
   }
@@ -2878,7 +2934,10 @@ input:focus-visible {
   }
 
   .disabled-provider-button {
-    margin-left: 48px;
+    width: 100%;
+    min-width: 0;
+    justify-content: center;
+    margin-left: 0;
   }
 
   .page-footer {
@@ -3198,9 +3257,11 @@ body {
 
 .objective-metrics {
   display: flex;
+  min-width: 0;
+  max-width: 100%;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 6px 10px;
 }
 
 .objective-display strong {
@@ -3210,16 +3271,19 @@ body {
 
 .portal-status-text {
   display: inline-flex;
+  min-width: 0;
   align-items: center;
   gap: 4px;
   font-size: 11px;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .portal-status-text svg {
   width: 12px;
   height: 12px;
+  flex: 0 0 auto;
 }
 
 .portal-status-sealed {
@@ -3231,7 +3295,17 @@ body {
 }
 
 .quick-stats {
-  gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  gap: 8px;
+}
+
+.quick-stat {
+  padding: 6px 10px;
+  border: 1px solid rgba(226, 209, 173, 0.72);
+  border-radius: 10px;
+  background: rgba(255, 252, 244, 0.76);
 }
 
 .quick-stat strong {
@@ -3917,10 +3991,12 @@ body {
   }
 
   .top-navigation {
+    display: grid;
     order: 3;
     width: 100%;
     height: auto;
-    justify-content: center;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
     padding-top: 8px;
   }
 
@@ -3941,25 +4017,29 @@ body {
 
 @media (max-width: 640px) {
   .topbar {
-    gap: 0 8px;
-    padding: 10px 14px;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .brand-copy strong {
+    max-width: 100%;
   }
 
   .page-content {
-    padding: 21px 14px 18px;
+    padding: 18px 12px 18px;
   }
 
   .page-intro {
     min-height: 0;
     align-items: flex-start;
     flex-direction: column;
-    gap: 17px;
-    padding: 24px 20px;
-    border-radius: 19px;
+    gap: 14px;
+    padding: 20px 16px;
+    border-radius: 18px;
   }
 
   .page-intro h1 {
-    font-size: 32px;
+    font-size: clamp(24px, 7vw, 32px);
   }
 
   .journey-progress {
@@ -3969,6 +4049,7 @@ body {
   }
 
   .level-heading-row {
+    flex-wrap: wrap;
     gap: 8px;
   }
 
@@ -3992,12 +4073,37 @@ body {
   }
 
   .game-card-header {
+    flex-direction: column;
+    align-items: stretch;
     gap: 10px;
-    padding: 12px;
+    padding: 12px 13px;
+  }
+
+  .objective-display {
+    width: 100%;
+    flex: none;
+    min-width: 0;
+  }
+
+  .objective-metrics {
+    gap: 6px 8px;
   }
 
   .quick-stats {
-    gap: 9px;
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding-top: 9px;
+    border-top: 1px solid rgba(226, 209, 173, 0.72);
+  }
+
+  .quick-stat {
+    min-width: 0;
+  }
+
+  .board-progress-row {
+    width: min(100% - 22px, 440px);
   }
 
   .board-frame {
@@ -4112,6 +4218,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 9px;
+  overflow-y: auto;
   padding: clamp(14px, 3.5vw, 24px);
   border: 1px solid #dcc795;
   border-radius: 10px;
@@ -4238,9 +4345,10 @@ body {
 
 .star-rating-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 4px 8px;
   color: #8a7b59;
   font-size: 9px;
 }
@@ -5485,6 +5593,60 @@ body {
 
   .board-result-overlay.board-result-compact h3 {
     font-size: 14px;
+  }
+
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 10px;
+  }
+
+  .settings-card,
+  .reward-balance-card,
+  .reward-earn-card,
+  .reward-history {
+    padding: 15px;
+  }
+
+  .auth-page {
+    justify-content: flex-start;
+    padding: 22px 14px 32px;
+  }
+
+  .auth-back-link {
+    position: static;
+    align-self: flex-start;
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .brand-copy span {
+    display: none;
+  }
+
+  .bird-companion {
+    gap: 10px;
+    padding: 11px 12px;
+  }
+
+  .bird-companion-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+  }
+
+  .bird-companion-svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .level-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .quick-stats {
+    gap: 6px;
   }
 }
 
