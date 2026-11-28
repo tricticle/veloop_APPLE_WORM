@@ -147,33 +147,6 @@ export function GameBoard({
     }) ||
       nextBirdPositions.has(coordKey(head)))
 
-  const wormContiguousPolylines = splitContiguousPaths(state.worm)
-  const bodyGradientId = `worm-body-grad-${level.id}`
-  const headGradientId = `worm-head-grad-${level.id}`
-  const tailGradientId = `worm-tail-grad-${level.id}`
-
-  const bodySegments = state.worm.slice(1, -1).map((segment, index) => {
-    const wormIndex = index + 1
-    const prev = state.worm[wormIndex - 1]
-    const next = state.worm[wormIndex + 1]
-    const isBreak =
-      Math.abs(prev.x - segment.x) + Math.abs(prev.y - segment.y) > 1 ||
-      Math.abs(next.x - segment.x) + Math.abs(next.y - segment.y) > 1
-    const dx = isBreak ? 1 : prev.x - next.x
-    const dy = isBreak ? 0 : prev.y - next.y
-    const angle = (Math.atan2(dy, dx) * 180) / Math.PI
-    const progress = state.worm.length > 2 ? wormIndex / (state.worm.length - 1) : 0.5
-    const radius = 0.285 - progress * 0.06
-    return {
-      key: `${segment.x},${segment.y},${wormIndex}`,
-      cx: segment.x + 0.5,
-      cy: segment.y + 0.5,
-      angle,
-      radius,
-      pulseDelay: `${-wormIndex * 0.09}s`,
-    }
-  })
-
   const tail = state.worm.length > 1 ? state.worm[state.worm.length - 1] : null
   const beforeTail = state.worm.length > 1 ? state.worm[state.worm.length - 2] : null
   const tailJump =
@@ -185,9 +158,40 @@ export function GameBoard({
       ? (Math.atan2(tail.y - beforeTail.y, tail.x - beforeTail.x) * 180) / Math.PI
       : 0
 
+  // Draw the uniform body polyline up to beforeTail when the tail tapers seamlessly from it
+  const bodyPoints = !tailJump && state.worm.length > 1 ? state.worm.slice(0, -1) : state.worm
+  const wormContiguousPolylines = splitContiguousPaths(bodyPoints)
+
+  const bodySpots = state.worm.slice(1, -1).map((segment, index) => {
+    const wormIndex = index + 1
+    const prev = state.worm[wormIndex - 1]
+    const next = state.worm[wormIndex + 1]
+    const isBreak =
+      Math.abs(prev.x - segment.x) + Math.abs(prev.y - segment.y) > 1 ||
+      Math.abs(next.x - segment.x) + Math.abs(next.y - segment.y) > 1
+    const dx = isBreak ? 1 : prev.x - next.x
+    const dy = isBreak ? 0 : prev.y - next.y
+    const angle = (Math.atan2(dy, dx) * 180) / Math.PI
+    const progress = state.worm.length > 2 ? wormIndex / (state.worm.length - 1) : 0.5
+    const radius = 0.14 - progress * 0.03
+    return {
+      key: `${segment.x},${segment.y},${wormIndex}`,
+      cx: segment.x + 0.5,
+      cy: segment.y + 0.5,
+      angle,
+      radius,
+      pulseDelay: `${-wormIndex * 0.09}s`,
+    }
+  })
+
   const hx = head.x + 0.5
   const hy = head.y + 0.5
   const ateRecently = Boolean(state.lastComboPoints && state.lastComboPoints > 0)
+  const headMoveClass = ateRecently
+    ? 'worm-head-ate-pop'
+    : headDirection === 'left' || headDirection === 'right'
+      ? 'worm-head-move-squash-x'
+      : 'worm-head-move-squash-y'
 
   const isWallAt = (cx: number, cy: number) =>
     cx < 0 ||
@@ -506,24 +510,6 @@ export function GameBoard({
           viewBox={`0 0 ${level.grid.columns} ${level.grid.rows}`}
           preserveAspectRatio="none"
         >
-          <defs>
-            <linearGradient id={bodyGradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#94f164" />
-              <stop offset="50%" stopColor="#3eb843" />
-              <stop offset="100%" stopColor="#1b7e39" />
-            </linearGradient>
-            <linearGradient id={headGradientId} x1="20%" y1="10%" x2="80%" y2="90%">
-              <stop offset="0%" stopColor="#b8f773" />
-              <stop offset="52%" stopColor="#4ec449" />
-              <stop offset="100%" stopColor="#21833a" />
-            </linearGradient>
-            <linearGradient id={tailGradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#2fa03c" />
-              <stop offset="65%" stopColor="#65cb4f" />
-              <stop offset="100%" stopColor="#cbf578" />
-            </linearGradient>
-          </defs>
-
           {/* Post-clear Ghost Path Reveal Overlay */}
           {showPathReveal && (
             <g className="ghost-path-reveal">
@@ -536,321 +522,330 @@ export function GameBoard({
             </g>
           )}
 
-          {/* Tapered rounded tail with trailing wiggle + chartreuse tip highlight */}
-          {tail && (
-            <g transform={`translate(${tail.x + 0.5}, ${tail.y + 0.5}) rotate(${tailAngle})`}>
+          {/* Pass 1: Unified dark forest-green silhouette (body + seamless tapered tail) */}
+          {wormContiguousPolylines.map((points, idx) => (
+            <polyline key={`worm-outline-${idx}`} className="worm-path-shadow" points={points} />
+          ))}
+          {tail && beforeTail && !tailJump && (
+            <g transform={`translate(${beforeTail.x + 0.5}, ${beforeTail.y + 0.5}) rotate(${tailAngle})`}>
               <g className="worm-tail-wiggle">
                 <path
-                  d="M -0.1 -0.24 C 0.1 -0.22 0.29 -0.11 0.35 0 C 0.29 0.11 0.1 0.22 -0.1 0.24 Z"
-                  fill={`url(#${tailGradientId})`}
-                  stroke="#0e4520"
-                  strokeWidth="0.05"
-                  strokeLinejoin="round"
+                  d="M 0 -0.31 C 0.34 -0.31 0.72 -0.22 1.04 -0.11 C 1.18 -0.065 1.25 -0.03 1.25 0 C 1.25 0.03 1.18 0.065 1.04 0.11 C 0.72 0.22 0.34 0.31 0 0.31 A 0.31 0.31 0 0 1 0 -0.31 Z"
+                  fill="#124a23"
                 />
-                <circle cx="0.24" cy="0" r="0.055" fill="#e6ffa8" opacity="0.88" />
               </g>
             </g>
           )}
+          {tail && tailJump && (
+            <circle cx={tail.x + 0.5} cy={tail.y + 0.5} r="0.25" fill="#124a23" />
+          )}
 
-          {/* Continuous body path(s), cleanly split across teleport jumps */}
+          {/* Pass 2: Unified vibrant green body + seamless tapered tail (exact match to head) */}
           {wormContiguousPolylines.map((points, idx) => (
-            <g key={`worm-seg-${idx}`}>
-              <polyline className="worm-path-shadow" points={points} />
-              <polyline
-                className="worm-path-body"
-                points={points}
-                stroke={`url(#${bodyGradientId})`}
-              />
-              <polyline className="worm-path-shine" points={points} />
-            </g>
+            <polyline key={`worm-body-${idx}`} className="worm-path-body" points={points} />
           ))}
+          {tail && beforeTail && !tailJump && (
+            <g transform={`translate(${beforeTail.x + 0.5}, ${beforeTail.y + 0.5}) rotate(${tailAngle})`}>
+              <g className="worm-tail-wiggle">
+                <path
+                  d="M 0 -0.25 C 0.34 -0.25 0.71 -0.16 1.02 -0.065 C 1.13 -0.03 1.19 -0.015 1.19 0 C 1.19 0.015 1.13 0.03 1.02 0.065 C 0.71 0.16 0.34 0.25 0 0.25 A 0.25 0.25 0 0 1 0 -0.25 Z"
+                  fill="#4ec449"
+                />
+                <path
+                  d="M 0.04 0 Q 0.58 0 1.08 0"
+                  fill="none"
+                  stroke="rgba(184, 247, 115, 0.45)"
+                  strokeWidth="0.1"
+                  strokeLinecap="round"
+                />
+              </g>
+            </g>
+          )}
+          {tail && tailJump && (
+            <circle cx={tail.x + 0.5} cy={tail.y + 0.5} r="0.19" fill="#4ec449" />
+          )}
 
-          {/* Articulated dorsal segments */}
-          {bodySegments.map(({ key, cx, cy, angle, radius, pulseDelay }) => (
+          {/* Pass 3: Centered dorsal highlight & subtle texture spots */}
+          {wormContiguousPolylines.map((points, idx) => (
+            <polyline key={`worm-shine-${idx}`} className="worm-path-shine" points={points} />
+          ))}
+          {bodySpots.map(({ key, cx, cy, angle, radius, pulseDelay }) => (
             <g
               key={key}
               className="worm-body-segment"
               style={{ animationDelay: pulseDelay }}
               transform={`translate(${cx}, ${cy}) rotate(${angle})`}
             >
-              <circle
+              <ellipse
                 cx="0"
                 cy="0"
-                r={radius}
-                fill={`url(#${bodyGradientId})`}
-                stroke="#134c24"
-                strokeWidth="0.045"
-              />
-              <path
-                d={`M ${-radius * 0.15} ${-radius * 0.65} Q ${radius * 0.35} 0 ${-radius * 0.15} ${radius * 0.65}`}
-                fill="none"
-                stroke="rgba(218, 255, 174, 0.78)"
-                strokeWidth="0.055"
-                strokeLinecap="round"
-              />
-              <circle
-                cx={-radius * 0.15}
-                cy={-radius * 0.42}
-                r="0.042"
-                fill="rgba(247, 255, 224, 0.88)"
+                rx={radius * 0.85}
+                ry={radius * 1.1}
+                fill="rgba(184, 247, 115, 0.38)"
               />
             </g>
           ))}
 
-          {/* Expressive, never-upside-down SVG Head with squash/stretch & growth pop */}
-          <g
-            key={`head-${state.moves}-${state.worm.length}`}
-            className={`worm-svg-head ${ateRecently ? 'worm-head-ate-pop' : 'worm-head-move-squash'}`}
-            style={{ transformOrigin: `${hx}px ${hy}px` }}
-          >
-            {headDirection === 'up' || headDirection === 'down' ? (
-              <g transform={`translate(${hx}, ${hy}) ${headDirection === 'down' ? 'scale(1, -1)' : ''}`}>
-                {!isFailed && (
-                  <path
-                    className="worm-tongue"
-                    d="M 0 -0.37 L 0 -0.49 M 0 -0.49 L -0.05 -0.54 M 0 -0.49 L 0.05 -0.54"
-                    fill="none"
-                    stroke="#eb5f52"
-                    strokeWidth="0.036"
-                    strokeLinecap="round"
-                  />
-                )}
-                <ellipse
-                  cx="0"
-                  cy="0"
-                  rx="0.34"
-                  ry="0.37"
-                  fill={`url(#${headGradientId})`}
-                  stroke="#124a23"
-                  strokeWidth="0.055"
+          {/* Pass 4: Expressive, centered SVG Head matching body & tail color */}
+          <g transform={`translate(${hx}, ${hy})`}>
+            {!isFailed && (
+              <g
+                transform={
+                  headDirection === 'down'
+                    ? 'scale(1, -1)'
+                    : headDirection === 'left'
+                      ? 'scale(-1, 1)'
+                      : undefined
+                }
+              >
+                <path
+                  className="worm-tongue"
+                  d={
+                    headDirection === 'up' || headDirection === 'down'
+                      ? 'M 0 -0.34 L 0 -0.46 M 0 -0.46 L -0.05 -0.51 M 0 -0.46 L 0.05 -0.51'
+                      : 'M 0.34 0 L 0.46 0 M 0.46 0 L 0.51 -0.05 M 0.46 0 L 0.51 0.05'
+                  }
+                  fill="none"
+                  stroke="#eb5f52"
+                  strokeWidth="0.036"
+                  strokeLinecap="round"
                 />
-                <ellipse
-                  cx="-0.09"
-                  cy="-0.14"
-                  rx="0.11"
-                  ry="0.055"
-                  fill="rgba(240, 255, 206, 0.55)"
-                />
-                {isFailed ? (
-                  <>
-                    <path
-                      d="M -0.19 -0.14 L -0.09 -0.04 M -0.09 -0.14 L -0.19 -0.04"
-                      stroke="#133d20"
-                      strokeWidth="0.042"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M 0.09 -0.14 L 0.19 -0.04 M 0.19 -0.14 L 0.09 -0.04"
-                      stroke="#133d20"
-                      strokeWidth="0.042"
-                      strokeLinecap="round"
-                    />
-                  </>
-                ) : isCompleted ? (
-                  <>
-                    <path
-                      d="M -0.2 -0.08 Q -0.14 -0.17 -0.07 -0.08"
-                      fill="none"
-                      stroke="#133d20"
-                      strokeWidth="0.042"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M 0.07 -0.08 Q 0.14 -0.17 0.2 -0.08"
-                      fill="none"
-                      stroke="#133d20"
-                      strokeWidth="0.042"
-                      strokeLinecap="round"
-                    />
-                  </>
-                ) : (
-                  <g className="worm-eye-blink">
-                    <circle
-                      cx="-0.14"
-                      cy="-0.1"
-                      r={isNearApple || isNearDanger ? 0.106 : 0.092}
-                      fill="#fffdf3"
-                      stroke="#144925"
-                      strokeWidth="0.03"
-                    />
-                    <circle
-                      cx="0.14"
-                      cy="-0.1"
-                      r={isNearApple || isNearDanger ? 0.106 : 0.092}
-                      fill="#fffdf3"
-                      stroke="#144925"
-                      strokeWidth="0.03"
-                    />
-                    <circle
-                      cx="-0.14"
-                      cy="-0.12"
-                      r={isNearDanger ? 0.035 : 0.048}
-                      fill="#143a21"
-                    />
-                    <circle
-                      cx="0.14"
-                      cy="-0.12"
-                      r={isNearDanger ? 0.035 : 0.048}
-                      fill="#143a21"
-                    />
-                    <circle cx="-0.155" cy="-0.14" r="0.018" fill="#ffffff" />
-                    <circle cx="0.125" cy="-0.14" r="0.018" fill="#ffffff" />
-                  </g>
-                )}
-                <circle cx="-0.22" cy="0.06" r="0.05" fill="rgba(255, 130, 102, 0.58)" />
-                <circle cx="0.22" cy="0.06" r="0.05" fill="rgba(255, 130, 102, 0.58)" />
-                {isFailed || isNearDanger ? (
-                  <path
-                    d="M -0.09 0.14 Q 0 0.07 0.09 0.14"
-                    fill="none"
-                    stroke="#133d20"
-                    strokeWidth="0.04"
-                    strokeLinecap="round"
-                  />
-                ) : isNearApple ? (
-                  <ellipse
-                    cx="0"
-                    cy="0.1"
-                    rx="0.075"
-                    ry="0.06"
-                    fill="#9c2c24"
-                    stroke="#133d20"
-                    strokeWidth="0.028"
-                  />
-                ) : (
-                  <path
-                    d="M -0.09 0.09 Q 0 0.16 0.09 0.09"
-                    fill="none"
-                    stroke="#133d20"
-                    strokeWidth="0.038"
-                    strokeLinecap="round"
-                  />
-                )}
-              </g>
-            ) : (
-              <g transform={`translate(${hx}, ${hy}) ${headDirection === 'left' ? 'scale(-1, 1)' : ''}`}>
-                {!isFailed && (
-                  <path
-                    className="worm-tongue"
-                    d="M 0.36 0.03 L 0.48 0.03 M 0.48 0.03 L 0.53 -0.02 M 0.48 0.03 L 0.53 0.08"
-                    fill="none"
-                    stroke="#eb5f52"
-                    strokeWidth="0.036"
-                    strokeLinecap="round"
-                  />
-                )}
-                <ellipse
-                  cx="0.02"
-                  cy="0"
-                  rx="0.37"
-                  ry="0.34"
-                  fill={`url(#${headGradientId})`}
-                  stroke="#124a23"
-                  strokeWidth="0.055"
-                />
-                <ellipse
-                  cx="-0.06"
-                  cy="-0.17"
-                  rx="0.13"
-                  ry="0.052"
-                  fill="rgba(240, 255, 206, 0.58)"
-                />
-                {isFailed ? (
-                  <>
-                    <path
-                      d="M -0.09 -0.15 L 0.01 -0.05 M 0.01 -0.15 L -0.09 -0.05"
-                      stroke="#133d20"
-                      strokeWidth="0.042"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M 0.13 -0.15 L 0.23 -0.05 M 0.23 -0.15 L 0.13 -0.05"
-                      stroke="#133d20"
-                      strokeWidth="0.042"
-                      strokeLinecap="round"
-                    />
-                  </>
-                ) : isCompleted ? (
-                  <>
-                    <path
-                      d="M -0.08 -0.08 Q -0.01 -0.16 0.05 -0.08"
-                      fill="none"
-                      stroke="#133d20"
-                      strokeWidth="0.042"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M 0.11 -0.08 Q 0.17 -0.16 0.24 -0.08"
-                      fill="none"
-                      stroke="#133d20"
-                      strokeWidth="0.042"
-                      strokeLinecap="round"
-                    />
-                  </>
-                ) : (
-                  <g className="worm-eye-blink">
-                    <circle
-                      cx="-0.03"
-                      cy="-0.1"
-                      r={isNearApple || isNearDanger ? 0.106 : 0.092}
-                      fill="#fffdf3"
-                      stroke="#144925"
-                      strokeWidth="0.03"
-                    />
-                    <circle
-                      cx="0.17"
-                      cy="-0.09"
-                      r={isNearApple || isNearDanger ? 0.103 : 0.088}
-                      fill="#fffdf3"
-                      stroke="#144925"
-                      strokeWidth="0.03"
-                    />
-                    <circle
-                      cx="-0.005"
-                      cy="-0.1"
-                      r={isNearDanger ? 0.035 : 0.048}
-                      fill="#143a21"
-                    />
-                    <circle
-                      cx="0.195"
-                      cy="-0.09"
-                      r={isNearDanger ? 0.035 : 0.046}
-                      fill="#143a21"
-                    />
-                    <circle cx="-0.02" cy="-0.125" r="0.018" fill="#ffffff" />
-                    <circle cx="0.18" cy="-0.115" r="0.018" fill="#ffffff" />
-                  </g>
-                )}
-                <circle cx="-0.11" cy="0.09" r="0.055" fill="rgba(255, 130, 102, 0.58)" />
-                {isFailed || isNearDanger ? (
-                  <path
-                    d="M 0.05 0.15 Q 0.14 0.08 0.23 0.15"
-                    fill="none"
-                    stroke="#133d20"
-                    strokeWidth="0.04"
-                    strokeLinecap="round"
-                  />
-                ) : isNearApple ? (
-                  <ellipse
-                    cx="0.16"
-                    cy="0.11"
-                    rx="0.075"
-                    ry="0.06"
-                    fill="#9c2c24"
-                    stroke="#133d20"
-                    strokeWidth="0.028"
-                  />
-                ) : (
-                  <path
-                    d="M 0.05 0.1 Q 0.15 0.17 0.24 0.09"
-                    fill="none"
-                    stroke="#133d20"
-                    strokeWidth="0.038"
-                    strokeLinecap="round"
-                  />
-                )}
               </g>
             )}
+
+            <g
+              key={`head-${state.moves}-${state.worm.length}`}
+              className={`worm-svg-head ${headMoveClass}`}
+            >
+              {headDirection === 'up' || headDirection === 'down' ? (
+                <g transform={headDirection === 'down' ? 'scale(1, -1)' : undefined}>
+                  <ellipse
+                    cx="0"
+                    cy="0"
+                    rx="0.33"
+                    ry="0.33"
+                    fill="#4ec449"
+                    stroke="#124a23"
+                    strokeWidth="0.06"
+                  />
+                  <ellipse
+                    cx="-0.08"
+                    cy="-0.14"
+                    rx="0.11"
+                    ry="0.05"
+                    fill="rgba(184, 247, 115, 0.55)"
+                  />
+                  {isFailed ? (
+                    <>
+                      <path
+                        d="M -0.18 -0.13 L -0.08 -0.03 M -0.08 -0.13 L -0.18 -0.03"
+                        stroke="#133d20"
+                        strokeWidth="0.042"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M 0.08 -0.13 L 0.18 -0.03 M 0.18 -0.13 L 0.08 -0.03"
+                        stroke="#133d20"
+                        strokeWidth="0.042"
+                        strokeLinecap="round"
+                      />
+                    </>
+                  ) : isCompleted ? (
+                    <>
+                      <path
+                        d="M -0.19 -0.07 Q -0.13 -0.16 -0.06 -0.07"
+                        fill="none"
+                        stroke="#133d20"
+                        strokeWidth="0.042"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M 0.06 -0.07 Q 0.13 -0.16 0.19 -0.07"
+                        fill="none"
+                        stroke="#133d20"
+                        strokeWidth="0.042"
+                        strokeLinecap="round"
+                      />
+                    </>
+                  ) : (
+                    <g className="worm-eye-blink">
+                      <circle
+                        cx="-0.13"
+                        cy="-0.09"
+                        r={isNearApple || isNearDanger ? 0.102 : 0.088}
+                        fill="#fffdf3"
+                        stroke="#144925"
+                        strokeWidth="0.03"
+                      />
+                      <circle
+                        cx="0.13"
+                        cy="-0.09"
+                        r={isNearApple || isNearDanger ? 0.102 : 0.088}
+                        fill="#fffdf3"
+                        stroke="#144925"
+                        strokeWidth="0.03"
+                      />
+                      <circle
+                        cx="-0.13"
+                        cy="-0.11"
+                        r={isNearDanger ? 0.035 : 0.046}
+                        fill="#143a21"
+                      />
+                      <circle
+                        cx="0.13"
+                        cy="-0.11"
+                        r={isNearDanger ? 0.035 : 0.046}
+                        fill="#143a21"
+                      />
+                      <circle cx="-0.145" cy="-0.13" r="0.017" fill="#ffffff" />
+                      <circle cx="0.115" cy="-0.13" r="0.017" fill="#ffffff" />
+                    </g>
+                  )}
+                  <circle cx="-0.21" cy="0.06" r="0.048" fill="rgba(255, 130, 102, 0.58)" />
+                  <circle cx="0.21" cy="0.06" r="0.048" fill="rgba(255, 130, 102, 0.58)" />
+                  {isFailed || isNearDanger ? (
+                    <path
+                      d="M -0.09 0.14 Q 0 0.07 0.09 0.14"
+                      fill="none"
+                      stroke="#133d20"
+                      strokeWidth="0.04"
+                      strokeLinecap="round"
+                    />
+                  ) : isNearApple ? (
+                    <ellipse
+                      cx="0"
+                      cy="0.1"
+                      rx="0.072"
+                      ry="0.058"
+                      fill="#9c2c24"
+                      stroke="#133d20"
+                      strokeWidth="0.028"
+                    />
+                  ) : (
+                    <path
+                      d="M -0.09 0.09 Q 0 0.16 0.09 0.09"
+                      fill="none"
+                      stroke="#133d20"
+                      strokeWidth="0.038"
+                      strokeLinecap="round"
+                    />
+                  )}
+                </g>
+              ) : (
+                <g transform={headDirection === 'left' ? 'scale(-1, 1)' : undefined}>
+                  <ellipse
+                    cx="0"
+                    cy="0"
+                    rx="0.33"
+                    ry="0.33"
+                    fill="#4ec449"
+                    stroke="#124a23"
+                    strokeWidth="0.06"
+                  />
+                  <ellipse
+                    cx="-0.06"
+                    cy="-0.15"
+                    rx="0.12"
+                    ry="0.048"
+                    fill="rgba(184, 247, 115, 0.55)"
+                  />
+                  {isFailed ? (
+                    <>
+                      <path
+                        d="M -0.1 -0.14 L 0 -0.04 M 0 -0.14 L -0.1 -0.04"
+                        stroke="#133d20"
+                        strokeWidth="0.042"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M 0.11 -0.14 L 0.21 -0.04 M 0.21 -0.14 L 0.11 -0.04"
+                        stroke="#133d20"
+                        strokeWidth="0.042"
+                        strokeLinecap="round"
+                      />
+                    </>
+                  ) : isCompleted ? (
+                    <>
+                      <path
+                        d="M -0.09 -0.07 Q -0.02 -0.15 0.04 -0.07"
+                        fill="none"
+                        stroke="#133d20"
+                        strokeWidth="0.042"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M 0.1 -0.07 Q 0.16 -0.15 0.23 -0.07"
+                        fill="none"
+                        stroke="#133d20"
+                        strokeWidth="0.042"
+                        strokeLinecap="round"
+                      />
+                    </>
+                  ) : (
+                    <g className="worm-eye-blink">
+                      <circle
+                        cx="-0.04"
+                        cy="-0.09"
+                        r={isNearApple || isNearDanger ? 0.102 : 0.088}
+                        fill="#fffdf3"
+                        stroke="#144925"
+                        strokeWidth="0.03"
+                      />
+                      <circle
+                        cx="0.15"
+                        cy="-0.08"
+                        r={isNearApple || isNearDanger ? 0.098 : 0.085}
+                        fill="#fffdf3"
+                        stroke="#144925"
+                        strokeWidth="0.03"
+                      />
+                      <circle
+                        cx="-0.015"
+                        cy="-0.09"
+                        r={isNearDanger ? 0.035 : 0.046}
+                        fill="#143a21"
+                      />
+                      <circle
+                        cx="0.175"
+                        cy="-0.08"
+                        r={isNearDanger ? 0.035 : 0.044}
+                        fill="#143a21"
+                      />
+                      <circle cx="-0.03" cy="-0.115" r="0.017" fill="#ffffff" />
+                      <circle cx="0.16" cy="-0.105" r="0.017" fill="#ffffff" />
+                    </g>
+                  )}
+                  <circle cx="-0.12" cy="0.09" r="0.052" fill="rgba(255, 130, 102, 0.58)" />
+                  {isFailed || isNearDanger ? (
+                    <path
+                      d="M 0.04 0.14 Q 0.13 0.07 0.22 0.14"
+                      fill="none"
+                      stroke="#133d20"
+                      strokeWidth="0.04"
+                      strokeLinecap="round"
+                    />
+                  ) : isNearApple ? (
+                    <ellipse
+                      cx="0.15"
+                      cy="0.1"
+                      rx="0.072"
+                      ry="0.058"
+                      fill="#9c2c24"
+                      stroke="#133d20"
+                      strokeWidth="0.028"
+                    />
+                  ) : (
+                    <path
+                      d="M 0.04 0.09 Q 0.14 0.16 0.23 0.08"
+                      fill="none"
+                      stroke="#133d20"
+                      strokeWidth="0.038"
+                      strokeLinecap="round"
+                    />
+                  )}
+                </g>
+              )}
+            </g>
           </g>
         </svg>
 
